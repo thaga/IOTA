@@ -334,6 +334,7 @@ function _Main$main$AS(args) {
 			ZenithY = z1n / z1d;
 			z_x = ZenithX * Math.PI / 180;
 			z_y = ZenithY * Math.PI / 180;
+			draw();
 		});
 		binary_reader.readAsBinaryString(file);
 	}
@@ -392,8 +393,8 @@ function _Main$main$AS(args) {
 		var mev;
 		mev = ev;
 		if (left_down) {
-			view_h += (mev.clientX - left_last_x) * 0.003;
-			view_p += (mev.clientY - left_last_y) * 0.003;
+			view_h += (mev.clientX - left_last_x) * 0.0003 / near;
+			view_p += (mev.clientY - left_last_y) * 0.0003 / near;
 			if (view_p > 3.14159265 / 2) {
 				view_p = 3.14159265 / 2;
 			}

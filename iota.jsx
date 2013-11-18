@@ -20,11 +20,11 @@ class _Main {
 		canvas.height = dom.window.innerHeight;
 		
 		
-		
-		
+		// 全球の分割数 横・縦
 		var hdiv = 128;
 		var vdiv = 64;
 		
+		// hdiv+1 x vdiv+1 個の、0.0-1.0格子を作る
 		function create_lattice(hdiv:int, vdiv:int) : Float32Array {
 			var lattice_array = new Float32Array((hdiv+1)*(vdiv+1)*2);
 			for (var y = 0; y <= vdiv; ++y) for (var x = 0; x <= hdiv; ++x) {
@@ -33,6 +33,7 @@ class _Main {
 			}
 			return lattice_array;
 		}
+		// 上で作った格子を三角形ストリップでつなぐためのインデクス
 		function create_lattice_index(hdiv:int, vdiv:int) : Uint16Array {
 			var band_points = (hdiv + 1) * 2 + 2;
 			var index_array = new Uint16Array(band_points * vdiv);
@@ -50,9 +51,11 @@ class _Main {
 		// WebGLコンテキスト
 		var gl = canvas.getContext('experimental-webgl', {premultipliedAlpha: false}) as WebGLRenderingContext;
 		
+		// 格子の形状＆テクスチャ座標
 		var lattice_buf = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, lattice_buf);
 		gl.bufferData(gl.ARRAY_BUFFER, create_lattice(hdiv, vdiv), gl.STATIC_DRAW);
+		// それを描画するためのインデクス
 		var lattice_index_buf = gl.createBuffer();
 		var lattice_index_array = create_lattice_index(hdiv, vdiv);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lattice_index_buf);
@@ -61,6 +64,7 @@ class _Main {
 		gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(0);
 		
+		// 頂点シェーダを作成
 		var vs = gl.createShader(gl.VERTEX_SHADER);
 		gl.shaderSource(vs, """
 			precision mediump float;
@@ -79,6 +83,7 @@ class _Main {
 		gl.compileShader(vs);
 		if (!(gl.getShaderParameter(vs, gl.COMPILE_STATUS) as boolean)) console.log(gl.getShaderInfoLog(vs));
 		
+		// フラグメントシェーダを作成
 		var fs = gl.createShader(gl.FRAGMENT_SHADER);
 		gl.shaderSource(fs, """
 			precision mediump float;
@@ -91,6 +96,7 @@ class _Main {
 		gl.compileShader(fs);
 		if (!(gl.getShaderParameter(fs, gl.COMPILE_STATUS) as boolean)) console.log(gl.getShaderInfoLog(fs));
 		
+		// シェーダプログラムを作成
 		var prog = gl.createProgram();
 		gl.attachShader(prog, vs);
 		gl.attachShader(prog, fs);
@@ -99,6 +105,8 @@ class _Main {
 		
 		gl.useProgram(prog);
 		
+		
+		// テクスチャ、画角(near)、方位と仰角、THETAの傾き
 		var texture = null:WebGLTexture;
 		var near = 0.1;
 		var view_h = 0;
@@ -106,6 +114,7 @@ class _Main {
 		var z_x = 0;
 		var z_y = 0;
 		
+		// 描画
 		function draw() : void {
 			if (!texture) return;
 			
@@ -136,6 +145,7 @@ class _Main {
 			gl.drawElements(gl.TRIANGLE_STRIP, lattice_index_array.length, gl.UNSIGNED_SHORT, 0);
 		}
 		
+		// テクスチャを切り替える
 		function setImage(img:HTMLImageElement) : void {
 			if (!texture) {
 				texture = gl.createTexture();
@@ -152,6 +162,7 @@ class _Main {
 			draw();
 		}
 		
+		// 画角を変える
 		function onWheel(w:number) : void {
 			near *= Math.pow(0.9, w);
 			if (near > 0.9) near = 0.9;
@@ -165,12 +176,14 @@ class _Main {
 		var files = null:FileList;
 		var file_index = -1;
 		
+		// files変数のうちn番目のファイルをテクスチャにセットする
 		function setFile(n:int) : void {
 			if (!files) return;
 			if (n < 0 || n >= files.length) return;
 			
 			var file = files[n];
 			
+			// テクスチャ用のファイル読み取り
 			var file_reader = new FileReader;
 			file_reader.onload = function(e:Event):void {
 				// now file reading complete
@@ -185,6 +198,7 @@ class _Main {
 			};
 			file_reader.readAsDataURL(file);
 			
+			// THETAの姿勢読み取り
 			var binary_reader = new FileReader;
 			binary_reader.onload = function(e:Event):void {
 				var result = binary_reader.result as string;
@@ -212,6 +226,7 @@ class _Main {
 				var ZenithY = z1n / z1d;
 				z_x = ZenithX * Math.PI / 180;
 				z_y = ZenithY * Math.PI / 180;
+				draw();
 			};
 			binary_reader.readAsBinaryString(file);
 		}
@@ -253,6 +268,7 @@ class _Main {
 			var uev = ev as UIEvent;
 			onWheel(uev.detail / 3);
 		}, false);
+		
 		// マウス操作
 		var left_down = false;
 		var left_last_x = 0;
@@ -274,8 +290,8 @@ class _Main {
 		canvas.onmousemove = function(ev:Event):void {
 			var mev = ev as MouseEvent;
 			if (left_down) {
-				view_h += (mev.clientX - left_last_x) * 0.003;
-				view_p += (mev.clientY - left_last_y) * 0.003;
+				view_h += (mev.clientX - left_last_x) * 0.0003 / near;
+				view_p += (mev.clientY - left_last_y) * 0.0003 / near;
 				if (view_p > 3.14159265/2) view_p = 3.14159265/2;
 				if (view_p < -3.14159265/2) view_p = -3.14159265/2;
 				draw();
@@ -284,6 +300,7 @@ class _Main {
 			}
 			ev.preventDefault();
 		};
+		
 		// キー操作
 		dom.window.onkeydown = function(ev:Event):void {
 			var kev = ev as KeyboardEvent;
