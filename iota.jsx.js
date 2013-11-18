@@ -114,6 +114,26 @@ function _Main() {
 $__jsx_extend([_Main], Object);
 function _Main$main$AS(args) {
 	var canvas;
+	var input;
+	canvas = dom$id$S('iota_canvas');
+	canvas.style.position = 'absolute';
+	canvas.style.left = '0px';
+	canvas.style.top = '0px';
+	input = dom$id$S('files_input');
+	new Iota(canvas, input);
+	canvas.width = dom.window.innerWidth;
+	canvas.height = dom.window.innerHeight;
+	dom.window.onresize = (function (ev) {
+		canvas.width = dom.window.innerWidth;
+		canvas.height = dom.window.innerHeight;
+	});
+};
+
+_Main.main = _Main$main$AS;
+_Main.main$AS = _Main$main$AS;
+
+function Iota(canvas, input) {
+	var $this = this;
 	var hdiv;
 	var vdiv;
 	var create_lattice;
@@ -137,16 +157,9 @@ function _Main$main$AS(args) {
 	var files;
 	var file_index;
 	var setFile;
-	var input;
 	var left_down;
 	var left_last_x;
 	var left_last_y;
-	canvas = dom$id$S('iota_canvas');
-	canvas.style.position = 'absolute';
-	canvas.style.left = '0px';
-	canvas.style.top = '0px';
-	canvas.width = dom.window.innerWidth;
-	canvas.height = dom.window.innerHeight;
 	hdiv = 128;
 	vdiv = 64;
 	function create_lattice(hdiv, vdiv) {
@@ -326,6 +339,9 @@ function _Main$main$AS(args) {
 				return b[p] << 24 | b[p + 1] << 16 | b[p + 2] << 8 | b[p + 3];
 			}
 			offset = readInt32(bin, (pos | 0)) + 12;
+			if (offset > bin.length - 16) {
+				return;
+			}
 			z0n = readInt32(bin, (offset | 0));
 			z0d = readInt32(bin, (offset + 4 | 0));
 			z1n = readInt32(bin, (offset + 8 | 0));
@@ -348,16 +364,15 @@ function _Main$main$AS(args) {
 		files = de.dataTransfer.files;
 		setFile(((file_index = 0) | 0));
 	});
-	input = dom$id$S('files_input');
-	input.onchange = (function (e) {
-		files = input.files;
-		setFile(((file_index = 0) | 0));
-	});
-	dom.window.onresize = (function (ev) {
-		canvas.width = dom.window.innerWidth;
-		canvas.height = dom.window.innerHeight;
+	if (input) {
+		input.onchange = (function (e) {
+			files = input.files;
+			setFile(((file_index = 0) | 0));
+		});
+	}
+	dom.window.addEventListener('resize', (function (ev) {
 		draw();
-	});
+	}));
 	canvas.onmousewheel = (function (ev) {
 		var wev;
 		wev = ev;
@@ -389,6 +404,9 @@ function _Main$main$AS(args) {
 		}
 		ev.preventDefault();
 	});
+	canvas.onmouseout = (function (ev) {
+		left_down = false;
+	});
 	canvas.onmousemove = (function (ev) {
 		var mev;
 		mev = ev;
@@ -409,6 +427,9 @@ function _Main$main$AS(args) {
 	});
 	dom.window.onkeydown = (function (ev) {
 		var kev;
+		if (! files) {
+			return;
+		}
 		kev = ev;
 		switch (kev.keyCode) {
 		default:
@@ -420,7 +441,7 @@ function _Main$main$AS(args) {
 			setFile((file_index | 0));
 			break;
 		case 39:
-			if (files && ++ file_index >= files.length) {
+			if (++ file_index >= files.length) {
 				file_index = files.length - 1;
 			}
 			setFile((file_index | 0));
@@ -429,9 +450,7 @@ function _Main$main$AS(args) {
 	});
 };
 
-_Main.main = _Main$main$AS;
-_Main.main$AS = _Main$main$AS;
-
+$__jsx_extend([Iota], Object);
 function dom() {}
 $__jsx_extend([dom], Object);
 function dom$id$S(id) {
@@ -3888,7 +3907,9 @@ var $__jsx_classMap = {
 	},
 	"iota.jsx": {
 		_Main: _Main,
-		_Main$: _Main
+		_Main$: _Main,
+		Iota: Iota,
+		Iota$LHTMLCanvasElement$LHTMLInputElement$: Iota
 	},
 	"system:lib/js/js/web.jsx": {
 		dom: dom,

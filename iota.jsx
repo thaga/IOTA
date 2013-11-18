@@ -12,14 +12,24 @@ import 'mvq.jsx';
 class _Main {
 	static function main(args:string[]) : void {
 		var canvas = dom.id('iota_canvas') as HTMLCanvasElement;
-		// キャンバスの位置・サイズ調整
 		canvas.style.position = 'absolute';
 		canvas.style.left = '0px';
 		canvas.style.top = '0px';
+		var input = dom.id('files_input') as HTMLInputElement; 
+
+		new Iota(canvas, input);
+		
 		canvas.width = dom.window.innerWidth;
 		canvas.height = dom.window.innerHeight;
-		
-		
+		dom.window.onresize = function(ev:Event):void {
+			canvas.width = dom.window.innerWidth;
+			canvas.height = dom.window.innerHeight;
+		};
+	}
+}
+
+class Iota {
+	function constructor(canvas:HTMLCanvasElement, input:HTMLInputElement) {
 		// 全球の分割数 横・縦
 		var hdiv = 128;
 		var vdiv = 64;
@@ -218,6 +228,7 @@ class _Main {
 				pos += sign.length;
 				function readInt32(b:Uint8Array, p:int) : int {return b[p]<<24 | b[p+1]<<16 | b[p+2]<<8 | b[p+3];} 
 				var offset = readInt32(bin, pos) + 12;
+				if (offset > bin.length - 16) return; // ファイルの中にZenithEsが無かった
 				var z0n = readInt32(bin, offset);
 				var z0d = readInt32(bin, offset+4);
 				var z1n = readInt32(bin, offset+8);
@@ -244,20 +255,18 @@ class _Main {
 		};
 		
 		// ファイル選択
-		var input = dom.id('files_input') as HTMLInputElement;
-		input.onchange = function(e:Event):void {
-			files = input.files;
-			setFile(file_index = 0);
-		};
-		
+		if (input) {
+			input.onchange = function(e:Event):void {
+				files = input.files;
+				setFile(file_index = 0);
+			};
+		}
 		
 		
 		// ブラウザのリサイズ対応
-		dom.window.onresize = function(ev:Event):void {
-			canvas.width = dom.window.innerWidth;
-			canvas.height = dom.window.innerHeight;
+		dom.window.addEventListener('resize', function(ev:Event):void {
 			draw();
-		};
+		});
 		// Chrome向けホイールイベント登録
 		canvas.onmousewheel = function(ev:Event):void {
 			var wev = ev as __noconvert__ Map.<variant>;
@@ -287,6 +296,9 @@ class _Main {
 			if (mev.button == 0) left_down = false;
 			ev.preventDefault();
 		};
+		canvas.onmouseout = function(ev:Event):void {
+			left_down = false;
+		};
 		canvas.onmousemove = function(ev:Event):void {
 			var mev = ev as MouseEvent;
 			if (left_down) {
@@ -303,6 +315,8 @@ class _Main {
 		
 		// キー操作
 		dom.window.onkeydown = function(ev:Event):void {
+			if (!files) return;
+			
 			var kev = ev as KeyboardEvent;
 			switch (kev.keyCode) {
 				default: break;
@@ -311,7 +325,7 @@ class _Main {
 					setFile(file_index);
 					break;
 				case 39: // →
-					if (files && ++file_index >= files.length) file_index = files.length - 1;
+					if (++file_index >= files.length) file_index = files.length - 1;
 					setFile(file_index);
 					break;
 			}
