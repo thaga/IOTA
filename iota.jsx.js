@@ -129,6 +129,8 @@ function _Main$main$AS(args) {
 	var near;
 	var view_h;
 	var view_p;
+	var z_x;
+	var z_y;
 	var draw;
 	var setImage;
 	var onWheel;
@@ -211,6 +213,8 @@ function _Main$main$AS(args) {
 	near = 0.1;
 	view_h = 0;
 	view_p = 0;
+	z_x = 0;
+	z_y = 0;
 	function draw() {
 		var w;
 		var h;
@@ -224,7 +228,7 @@ function _Main$main$AS(args) {
 		hr = Math.max(1, w / h);
 		vr = Math.max(1, h / w);
 		gl.uniform1i(gl.getUniformLocation(prog, 'texture'), 0);
-		gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'projectionMatrix'), false, M44$frustum$NNNNNN(- 0.1 * hr, 0.1 * hr, - 0.1 * vr, 0.1 * vr, near, 1.1).mul$LM44$(M44$rotationX$N(- view_p)).mul$LM44$(M44$rotationY$N(- view_h)).array$());
+		gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'projectionMatrix'), false, M44$frustum$NNNNNN(- 0.1 * hr, 0.1 * hr, - 0.1 * vr, 0.1 * vr, near, 1.1).mul$LM44$(M44$rotationX$N(- view_p)).mul$LM44$(M44$rotationY$N(- view_h)).mul$LM44$(M44$rotationX$N(z_y)).mul$LM44$(M44$rotationZ$N(- z_x)).array$());
 		gl.viewport(0, 0, w, h);
 		gl.clearColor(0.1, 0.2, 0.3, 1);
 		gl.clear(gl.COLOR_BUFFER_BIT);
@@ -260,6 +264,7 @@ function _Main$main$AS(args) {
 	function setFile(n) {
 		var file;
 		var file_reader;
+		var binary_reader;
 		if (! files) {
 			return;
 		}
@@ -272,11 +277,65 @@ function _Main$main$AS(args) {
 			var img;
 			img = dom.document.createElement('img');
 			img.onload = (function (e) {
+				view_h = 0;
+				view_p = 0;
 				setImage(img);
 			});
 			img.src = e.target.result;
 		});
 		file_reader.readAsDataURL(file);
+		binary_reader = new FileReader();
+		binary_reader.onload = (function (e) {
+			var result;
+			var bin;
+			var i;
+			var sign;
+			var header_bound;
+			var pos;
+			var readInt32;
+			var offset;
+			var z0n;
+			var z0d;
+			var z1n;
+			var z1d;
+			var ZenithX;
+			var ZenithY;
+			result = binary_reader.result + "";
+			bin = new Uint8Array(result.length);
+			i = 0;
+			for (i = 0; i < bin.length; ++ i) {
+				bin[i] = result.charCodeAt(i) & 0xff;
+			}
+			sign = [ 0, 3, 0, 10, 0, 0, 0, 2 ];
+			header_bound = 10000;
+			for (pos = 0; pos < header_bound; ++ pos) {
+				for (i = 0; i < sign.length; ++ i) {
+					if (bin[i + pos] !== sign[i]) {
+						break;
+					}
+				}
+				if (i === sign.length) {
+					break;
+				}
+			}
+			if (pos === header_bound) {
+				return;
+			}
+			pos += sign.length;
+			function readInt32(b, p) {
+				return b[p] << 24 | b[p + 1] << 16 | b[p + 2] << 8 | b[p + 3];
+			}
+			offset = readInt32(bin, (pos | 0)) + 12;
+			z0n = readInt32(bin, (offset | 0));
+			z0d = readInt32(bin, (offset + 4 | 0));
+			z1n = readInt32(bin, (offset + 8 | 0));
+			z1d = readInt32(bin, (offset + 12 | 0));
+			ZenithX = z0n / z0d;
+			ZenithY = z1n / z1d;
+			z_x = ZenithX * Math.PI / 180;
+			z_y = ZenithY * Math.PI / 180;
+		});
+		binary_reader.readAsBinaryString(file);
 	}
 	canvas.ondragover = (function (e) {
 		e.preventDefault();

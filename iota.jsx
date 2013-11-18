@@ -98,7 +98,8 @@ class _Main {
 		var near = 0.1;
 		var view_h = 0;
 		var view_p = 0;
-		
+		var z_x = 0;
+		var z_y = 0;
 		
 		function draw() : void {
 			if (!texture) return;
@@ -115,7 +116,12 @@ class _Main {
 			gl.uniformMatrix4fv(
 				gl.getUniformLocation(prog, 'projectionMatrix'),
 				false,
-				M44.frustum(-0.1 * hr, 0.1 * hr, -0.1 * vr, 0.1 * vr, near, 1.1).mul(M44.rotationX(-view_p)).mul(M44.rotationY(-view_h)).array()
+				M44.frustum(-0.1 * hr, 0.1 * hr, -0.1 * vr, 0.1 * vr, near, 1.1)
+				.mul(M44.rotationX(-view_p))
+				.mul(M44.rotationY(-view_h))
+				.mul(M44.rotationX(z_y))
+				.mul(M44.rotationZ(-z_x))
+				.array()
 			);
 			
 			gl.viewport(0, 0, w, h);
@@ -166,11 +172,43 @@ class _Main {
 				var img = dom.document.createElement('img') as HTMLImageElement;
 				img.onload = function(e:Event):void {
 					// now image creation complete
+					view_h = 0;
+					view_p = 0;
 					setImage(img);
 				};
 				img.src = (e.target as FileReader).result as __noconvert__ string;
 			};
 			file_reader.readAsDataURL(file);
+			
+			var binary_reader = new FileReader;
+			binary_reader.onload = function(e:Event):void {
+				var result = binary_reader.result as string;
+				var bin = new Uint8Array(result.length);
+				var i = 0;
+				for (i = 0; i < bin.length; ++i) bin[i] = result.charCodeAt(i) & 0xff;
+				 // ZenithESを探す(ref→ http://d.hatena.ne.jp/xanxys/20131110/1384094832)
+				//-----------------------------------------------------------------------------
+				// シグネチャ\x00\x03\x00\x0a\x00\x00\x00\x02を探す
+				var sign = [0,3,0,10,0,0,0,2];
+				var header_bound = 10000; // 適当な読み取り限界
+				for (var pos = 0; pos < header_bound; ++pos) {
+					for (i = 0; i < sign.length; ++i) if (bin[i + pos] != sign[i]) break;
+					if (i == sign.length) break;
+				}
+				if (pos == header_bound) return; // ヘッダ範囲の中にシグネチャが見つからなかった
+				pos += sign.length;
+				function readInt32(b:Uint8Array, p:int) : int {return b[p]<<24 | b[p+1]<<16 | b[p+2]<<8 | b[p+3];} 
+				var offset = readInt32(bin, pos) + 12;
+				var z0n = readInt32(bin, offset);
+				var z0d = readInt32(bin, offset+4);
+				var z1n = readInt32(bin, offset+8);
+				var z1d = readInt32(bin, offset+12);
+				var ZenithX = z0n / z0d;
+				var ZenithY = z1n / z1d;
+				z_x = ZenithX * Math.PI / 180;
+				z_y = ZenithY * Math.PI / 180;
+			};
+			binary_reader.readAsBinaryString(file);
 		}
 		
 		// D&D対応
