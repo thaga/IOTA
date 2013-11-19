@@ -1,8 +1,3 @@
-// JSXによるコンパイルは、
-//  > jsx --disable-type-check --executable web --output iota.jsx.js iota.jsx
-//
-// --disable-type-checkが必要です。
-
 import 'js/web.jsx';
 import 'console.jsx';
 import 'Timer.jsx';
