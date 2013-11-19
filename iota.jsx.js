@@ -120,12 +120,24 @@ function _Main$main$AS(args) {
 	var i;
 	var elem;
 	var theta_url;
-	canvas = dom$id$S('iota_canvas');
+	canvas = (function ($v) {
+		if (! ($v == null || $v instanceof HTMLCanvasElement)) {
+			debugger;
+			throw new Error("[iota.jsx:15:43] detected invalid cast, value is not an instance of the designated type or null\n        var canvas = dom.id(\'iota_canvas\') as HTMLCanvasElement;\r\n                                           ^^\n");
+		}
+		return $v;
+	}(dom$id$S('iota_canvas')));
 	if (canvas) {
 		canvas.style.position = 'absolute';
 		canvas.style.left = '0px';
 		canvas.style.top = '0px';
-		input = dom$id$S('iota_input');
+		input = (function ($v) {
+			if (! ($v == null || $v instanceof HTMLInputElement)) {
+				debugger;
+				throw new Error("[iota.jsx:20:45] detected invalid cast, value is not an instance of the designated type or null\n            var input = dom.id(\'iota_input\') as HTMLInputElement; \r\n                                             ^^\n");
+			}
+			return $v;
+		}(dom$id$S('iota_input')));
 		iota = new Iota$0(canvas, input);
 		canvas.width = dom.window.innerWidth;
 		canvas.height = dom.window.innerHeight;
@@ -137,17 +149,41 @@ function _Main$main$AS(args) {
 	}
 	all_canvas = dom.window.document.getElementsByTagName('canvas');
 	for (i = 0; i < all_canvas.length; ++ i) {
-		elem = all_canvas[i];
+		elem = (function ($v) {
+			if (! ($v == null || $v instanceof HTMLElement)) {
+				debugger;
+				throw new Error("[iota.jsx:37:37] detected invalid cast, value is not an instance of the designated type or null\n            var elem = all_canvas[i] as HTMLElement;\r\n                                     ^^\n");
+			}
+			return $v;
+		}(all_canvas[i]));
 		theta_url = elem.dataset.thetaImg;
 		if (theta_url) {
 			(function (canvas, url) {
 				var img;
-				img = dom.window.document.createElement('img');
+				img = (function ($v) {
+					if (! ($v == null || $v instanceof HTMLImageElement)) {
+						debugger;
+						throw new Error("[iota.jsx:41:71] detected invalid cast, value is not an instance of the designated type or null\n                    var img = dom.window.document.createElement(\'img\') as HTMLImageElement;\r\n                                                                       ^^\n");
+					}
+					return $v;
+				}(dom.window.document.createElement('img')));
 				img.onload = (function (ev) {
 					new Iota(canvas, null, img);
 				});
 				img.src = url;
-			})(elem, theta_url);
+			})((function ($v) {
+				if (! ($v == null || $v instanceof HTMLCanvasElement)) {
+					debugger;
+					throw new Error("[iota.jsx:46:24] detected invalid cast, value is not an instance of the designated type or null\n                })(elem as HTMLCanvasElement, theta_url);\r\n                        ^^\n");
+				}
+				return $v;
+			}(elem)), (function (v) {
+				if (! (v != null)) {
+					debugger;
+					throw new Error("[iota.jsx:46:46] null access\n                })(elem as HTMLCanvasElement, theta_url);\r\n                                              ^^^^^^^^^\n");
+				}
+				return v;
+			}(theta_url)));
 		}
 	}
 };
@@ -216,7 +252,13 @@ function Iota(canvas, input, init_img) {
 		}
 		return index_array;
 	}
-	gl = canvas.getContext('experimental-webgl', ({ premultipliedAlpha: false }));
+	gl = (function ($v) {
+		if (! ($v == null || $v instanceof WebGLRenderingContext)) {
+			debugger;
+			throw new Error("[iota.jsx:84:86] detected invalid cast, value is not an instance of the designated type or null\n        var gl = canvas.getContext(\'experimental-webgl\', {premultipliedAlpha: false}) as WebGLRenderingContext;\r\n                                                                                      ^^\n");
+		}
+		return $v;
+	}(canvas.getContext('experimental-webgl', ({ premultipliedAlpha: false }))));
 	lattice_buf = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, lattice_buf);
 	gl.bufferData(gl.ARRAY_BUFFER, create_lattice((hdiv | 0), (vdiv | 0)), gl.STATIC_DRAW);
@@ -316,13 +358,31 @@ function Iota(canvas, input, init_img) {
 		file_reader = new FileReader();
 		file_reader.onload = (function (e) {
 			var img;
-			img = dom.document.createElement('img');
+			img = (function ($v) {
+				if (! ($v == null || $v instanceof HTMLImageElement)) {
+					debugger;
+					throw new Error("[iota.jsx:226:60] detected invalid cast, value is not an instance of the designated type or null\n                var img = dom.document.createElement(\'img\') as HTMLImageElement;\r\n                                                            ^^\n");
+				}
+				return $v;
+			}(dom.document.createElement('img')));
 			img.onload = (function (e) {
 				view_h = 0;
 				view_p = 0;
 				setImage(img);
 			});
-			img.src = e.target.result;
+			img.src = (function ($v) {
+				if (! (typeof $v === "string")) {
+					debugger;
+					throw new Error("[iota.jsx:233:58] detected invalid cast, value is not a string\n                img.src = (e.target as FileReader).result as __noconvert__ string;\r\n                                                          ^^\n");
+				}
+				return $v;
+			}((function ($v) {
+				if (! ($v == null || $v instanceof FileReader)) {
+					debugger;
+					throw new Error("[iota.jsx:233:36] detected invalid cast, value is not an instance of the designated type or null\n                img.src = (e.target as FileReader).result as __noconvert__ string;\r\n                                    ^^\n");
+				}
+				return $v;
+			}(e.target)).result));
 		});
 		file_reader.readAsDataURL(file);
 		binary_reader = new FileReader();
@@ -364,7 +424,31 @@ function Iota(canvas, input, init_img) {
 			}
 			pos += sign.length;
 			function readInt32(b, p) {
-				return b[p] << 24 | b[p + 1] << 16 | b[p + 2] << 8 | b[p + 3];
+				return (function (v) {
+					if (! (v != null)) {
+						debugger;
+						throw new Error("[iota.jsx:255:71] null access\n                function readInt32(b:Uint8Array, p:int) : int {return b[p]<<24 | b[p+1]<<16 | b[p+2]<<8 | b[p+3];} \r\n                                                                       ^\n");
+					}
+					return v;
+				}(b[p])) << 24 | (function (v) {
+					if (! (v != null)) {
+						debugger;
+						throw new Error("[iota.jsx:255:82] null access\n                function readInt32(b:Uint8Array, p:int) : int {return b[p]<<24 | b[p+1]<<16 | b[p+2]<<8 | b[p+3];} \r\n                                                                                  ^\n");
+					}
+					return v;
+				}(b[p + 1])) << 16 | (function (v) {
+					if (! (v != null)) {
+						debugger;
+						throw new Error("[iota.jsx:255:95] null access\n                function readInt32(b:Uint8Array, p:int) : int {return b[p]<<24 | b[p+1]<<16 | b[p+2]<<8 | b[p+3];} \r\n                                                                                               ^\n");
+					}
+					return v;
+				}(b[p + 2])) << 8 | (function (v) {
+					if (! (v != null)) {
+						debugger;
+						throw new Error("[iota.jsx:255:107] null access\n                function readInt32(b:Uint8Array, p:int) : int {return b[p]<<24 | b[p+1]<<16 | b[p+2]<<8 | b[p+3];} \r\n                                                                                                           ^\n");
+					}
+					return v;
+				}(b[p + 3]));
 			}
 			offset = readInt32(bin, (pos | 0)) + 12;
 			if (offset > bin.length - 16) {
@@ -382,30 +466,48 @@ function Iota(canvas, input, init_img) {
 		});
 		binary_reader.readAsBinaryString(file);
 	}
-	canvas.ondragover = (function (e) {
-		e.preventDefault();
-	});
-	canvas.ondrop = (function (e) {
-		var de;
-		e.preventDefault();
-		de = e;
-		files = de.dataTransfer.files;
-		setFile(((file_index = 0) | 0));
-	});
 	if (input) {
 		input.onchange = (function (e) {
 			files = input.files;
 			setFile(((file_index = 0) | 0));
 		});
 	}
+	canvas.ondragover = (function (e) {
+		e.preventDefault();
+	});
+	canvas.ondrop = (function (e) {
+		var de;
+		e.preventDefault();
+		de = (function ($v) {
+			if (! ($v == null || $v instanceof DragEvent)) {
+				debugger;
+				throw new Error("[iota.jsx:286:23] detected invalid cast, value is not an instance of the designated type or null\n            var de = e as __noconvert__ DragEvent; // CAUTION: Chrome creates MouseEvent\r\n                       ^^\n");
+			}
+			return $v;
+		}(e));
+		files = de.dataTransfer.files;
+		setFile(((file_index = 0) | 0));
+	});
 	canvas.onmousewheel = (function (ev) {
 		var wev;
-		wev = ev;
+		wev = (function ($v) {
+			if (! ($v == null || typeof $v === "object")) {
+				debugger;
+				throw new Error("[iota.jsx:295:25] detected invalid cast, value is not a Map or null\n            var wev = ev as __noconvert__ Map.<variant>;\r\n                         ^^\n");
+			}
+			return $v;
+		}(ev));
 		onWheel(+wev.wheelDelta / - 120);
 	});
 	canvas.addEventListener('DOMMouseScroll', (function (ev) {
 		var uev;
-		uev = ev;
+		uev = (function ($v) {
+			if (! ($v == null || $v instanceof UIEvent)) {
+				debugger;
+				throw new Error("[iota.jsx:300:25] detected invalid cast, value is not an instance of the designated type or null\n            var uev = ev as UIEvent;\r\n                         ^^\n");
+			}
+			return $v;
+		}(ev));
 		onWheel(uev.detail / 3);
 	}), false);
 	left_down = false;
@@ -413,7 +515,13 @@ function Iota(canvas, input, init_img) {
 	left_last_y = 0;
 	canvas.onmousedown = (function (ev) {
 		var mev;
-		mev = ev;
+		mev = (function ($v) {
+			if (! ($v == null || $v instanceof MouseEvent)) {
+				debugger;
+				throw new Error("[iota.jsx:309:25] detected invalid cast, value is not an instance of the designated type or null\n            var mev = ev as MouseEvent;\r\n                         ^^\n");
+			}
+			return $v;
+		}(ev));
 		if (mev.button === 0) {
 			left_down = true;
 			left_last_x = mev.clientX;
@@ -423,7 +531,13 @@ function Iota(canvas, input, init_img) {
 	});
 	canvas.onmouseup = (function (ev) {
 		var mev;
-		mev = ev;
+		mev = (function ($v) {
+			if (! ($v == null || $v instanceof MouseEvent)) {
+				debugger;
+				throw new Error("[iota.jsx:318:25] detected invalid cast, value is not an instance of the designated type or null\n            var mev = ev as MouseEvent;\r\n                         ^^\n");
+			}
+			return $v;
+		}(ev));
 		if (mev.button === 0) {
 			left_down = false;
 		}
@@ -435,7 +549,13 @@ function Iota(canvas, input, init_img) {
 	canvas.onmousemove = (function (ev) {
 		var mev;
 		var k;
-		mev = ev;
+		mev = (function ($v) {
+			if (! ($v == null || $v instanceof MouseEvent)) {
+				debugger;
+				throw new Error("[iota.jsx:326:25] detected invalid cast, value is not an instance of the designated type or null\n            var mev = ev as MouseEvent;\r\n                         ^^\n");
+			}
+			return $v;
+		}(ev));
 		if (left_down) {
 			k = 1 / Math.sqrt(canvas.width * canvas.height * near);
 			view_h += (mev.clientX - left_last_x) * k;
@@ -452,29 +572,37 @@ function Iota(canvas, input, init_img) {
 		}
 		ev.preventDefault();
 	});
-	dom.window.onkeydown = (function (ev) {
+	dom.window.addEventListener('keydown', (function (ev) {
 		var kev;
 		if (! files) {
 			return;
 		}
-		kev = ev;
+		kev = (function ($v) {
+			if (! ($v == null || $v instanceof KeyboardEvent)) {
+				debugger;
+				throw new Error("[iota.jsx:344:25] detected invalid cast, value is not an instance of the designated type or null\n            var kev = ev as KeyboardEvent;\r\n                         ^^\n");
+			}
+			return $v;
+		}(ev));
 		switch (kev.keyCode) {
 		default:
 			break;
 		case 37:
-			if (-- file_index < 0) {
+			if (-- file_index >= 0) {
+				setFile((file_index | 0));
+			} else {
 				file_index = 0;
 			}
-			setFile((file_index | 0));
 			break;
 		case 39:
-			if (++ file_index >= files.length) {
+			if (++ file_index < files.length) {
+				setFile((file_index | 0));
+			} else {
 				file_index = files.length - 1;
 			}
-			setFile((file_index | 0));
 			break;
 		}
-	});
+	}));
 };
 
 function Iota$0(canvas, input) {
@@ -486,19 +614,37 @@ $__jsx_extend([Iota, Iota$0], Object);
 function dom() {}
 $__jsx_extend([dom], Object);
 function dom$id$S(id) {
-	return dom.document.getElementById(id);
+	return (function ($v) {
+		if (! ($v == null || $v instanceof HTMLElement)) {
+			debugger;
+			throw new Error("[c:/Users/haga.takeshi/AppData/Roaming/npm/node_modules/jsx/lib/js/js/web.jsx:29:47] detected invalid cast, value is not an instance of the designated type or null\n        return dom.document.getElementById(id) as HTMLElement;\n                                               ^^\n");
+		}
+		return $v;
+	}(dom.document.getElementById(id)));
 };
 
 dom.id$S = dom$id$S;
 
 function dom$getElementById$S(id) {
-	return dom.document.getElementById(id);
+	return (function ($v) {
+		if (! ($v == null || $v instanceof HTMLElement)) {
+			debugger;
+			throw new Error("[c:/Users/haga.takeshi/AppData/Roaming/npm/node_modules/jsx/lib/js/js/web.jsx:37:47] detected invalid cast, value is not an instance of the designated type or null\n        return dom.document.getElementById(id) as HTMLElement;\n                                               ^^\n");
+		}
+		return $v;
+	}(dom.document.getElementById(id)));
 };
 
 dom.getElementById$S = dom$getElementById$S;
 
 function dom$createElement$S(tag) {
-	return dom.document.createElement(tag);
+	return (function ($v) {
+		if (! ($v == null || $v instanceof HTMLElement)) {
+			debugger;
+			throw new Error("[c:/Users/haga.takeshi/AppData/Roaming/npm/node_modules/jsx/lib/js/js/web.jsx:45:47] detected invalid cast, value is not an instance of the designated type or null\n        return dom.document.createElement(tag) as __noconvert__ HTMLElement;\n                                               ^^\n");
+		}
+		return $v;
+	}(dom.document.createElement(tag)));
 };
 
 dom.createElement$S = dom$createElement$S;
@@ -842,25 +988,49 @@ function Timer() {
 
 $__jsx_extend([Timer], Object);
 function Timer$setTimeout$F$V$N(callback, intervalMS) {
-	return js$0.global.setTimeout(callback, intervalMS);
+	return (function ($v) {
+		if (! ($v == null || typeof $v === "function")) {
+			debugger;
+			throw new Error("[c:/Users/haga.takeshi/AppData/Roaming/npm/node_modules/jsx/lib/js/Timer.jsx:34:40] detected invalid cast, value is not a function or null\n        return (js.global[\"setTimeout\"] as __noconvert__ function(:function():void,:number) : TimerHandle)(callback, intervalMS);\n                                        ^^\n");
+		}
+		return $v;
+	}(js$0.global.setTimeout))(callback, intervalMS);
 };
 
 Timer.setTimeout$F$V$N = Timer$setTimeout$F$V$N;
 
 function Timer$clearTimeout$LTimerHandle$(timer) {
-	js$0.global.clearTimeout(timer);
+	(function ($v) {
+		if (! ($v == null || typeof $v === "function")) {
+			debugger;
+			throw new Error("[c:/Users/haga.takeshi/AppData/Roaming/npm/node_modules/jsx/lib/js/Timer.jsx:38:35] detected invalid cast, value is not a function or null\n        (js.global[\"clearTimeout\"] as __noconvert__ function(:TimerHandle) : void)(timer);\n                                   ^^\n");
+		}
+		return $v;
+	}(js$0.global.clearTimeout))(timer);
 };
 
 Timer.clearTimeout$LTimerHandle$ = Timer$clearTimeout$LTimerHandle$;
 
 function Timer$setInterval$F$V$N(callback, intervalMS) {
-	return js$0.global.setInterval(callback, intervalMS);
+	return (function ($v) {
+		if (! ($v == null || typeof $v === "function")) {
+			debugger;
+			throw new Error("[c:/Users/haga.takeshi/AppData/Roaming/npm/node_modules/jsx/lib/js/Timer.jsx:42:41] detected invalid cast, value is not a function or null\n        return (js.global[\"setInterval\"] as __noconvert__ function(:function():void,:number) : TimerHandle)(callback, intervalMS);\n                                         ^^\n");
+		}
+		return $v;
+	}(js$0.global.setInterval))(callback, intervalMS);
 };
 
 Timer.setInterval$F$V$N = Timer$setInterval$F$V$N;
 
 function Timer$clearInterval$LTimerHandle$(timer) {
-	js$0.global.clearInterval(timer);
+	(function ($v) {
+		if (! ($v == null || typeof $v === "function")) {
+			debugger;
+			throw new Error("[c:/Users/haga.takeshi/AppData/Roaming/npm/node_modules/jsx/lib/js/Timer.jsx:46:36] detected invalid cast, value is not a function or null\n        (js.global[\"clearInterval\"] as __noconvert__ function(:TimerHandle) : void)(timer);\n                                    ^^\n");
+		}
+		return $v;
+	}(js$0.global.clearInterval))(timer);
 };
 
 Timer.clearInterval$LTimerHandle$ = Timer$clearInterval$LTimerHandle$;
@@ -892,10 +1062,22 @@ function Timer$_getRequestAnimationFrameImpl$B(useNativeImpl) {
 	if (useNativeImpl) {
 		prefixes = [ "r", "webkitR", "mozR", "oR", "msR" ];
 		for (i = 0; i < prefixes.length; ++ i) {
-			name = prefixes[i] + "equestAnimationFrame";
+			name = (function (v) {
+				if (! (v != null)) {
+					debugger;
+					throw new Error("[c:/Users/haga.takeshi/AppData/Roaming/npm/node_modules/jsx/lib/js/Timer.jsx:72:35] null access\n                var name = prefixes[i] + \"equestAnimationFrame\";\n                                   ^\n");
+				}
+				return v;
+			}(prefixes[i])) + "equestAnimationFrame";
 			if (js$0.global[name] instanceof Function) {
 				return (function (callback) {
-					return js$0.global[name](callback);
+					return (function ($v) {
+						if (! ($v == null || typeof $v === "function")) {
+							debugger;
+							throw new Error("[c:/Users/haga.takeshi/AppData/Roaming/npm/node_modules/jsx/lib/js/Timer.jsx:75:48] detected invalid cast, value is not a function or null\n                        return (js.global[name] as __noconvert__\n                                                ^^\n");
+						}
+						return $v;
+					}(js$0.global[name]))(callback);
 				});
 			}
 		}
@@ -922,10 +1104,22 @@ function Timer$_getCancelAnimationFrameImpl$B(useNativeImpl) {
 	if (useNativeImpl) {
 		prefixes = [ "c", "webkitC", "mozC", "oC", "msC" ];
 		for (i = 0; i < prefixes.length; ++ i) {
-			name = prefixes[i] + "ancelAnimationFrame";
+			name = (function (v) {
+				if (! (v != null)) {
+					debugger;
+					throw new Error("[c:/Users/haga.takeshi/AppData/Roaming/npm/node_modules/jsx/lib/js/Timer.jsx:100:35] null access\n                var name = prefixes[i] + \"ancelAnimationFrame\";\n                                   ^\n");
+				}
+				return v;
+			}(prefixes[i])) + "ancelAnimationFrame";
 			if (js$0.global[name] instanceof Function) {
 				return (function (timer) {
-					js$0.global[name](timer);
+					(function ($v) {
+						if (! ($v == null || typeof $v === "function")) {
+							debugger;
+							throw new Error("[c:/Users/haga.takeshi/AppData/Roaming/npm/node_modules/jsx/lib/js/Timer.jsx:103:41] detected invalid cast, value is not a function or null\n                        (js.global[name] as __noconvert__\n                                         ^^\n");
+						}
+						return $v;
+					}(js$0.global[name]))(timer);
 				});
 			}
 		}
@@ -1036,7 +1230,19 @@ V2.prototype.set$AN = function (v) {
 		debugger;
 		throw new Error("[mvq.jsx:38:24] assertion failure\n        assert(v.length == 2);\n                        ^^\n");
 	}
-	this.set$NN(v[0], v[1]);
+	this.set$NN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:39:18] null access\n        this.set(v[0], v[1]);\n                  ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:39:24] null access\n        this.set(v[0], v[1]);\n                        ^\n");
+		}
+		return v;
+	}(v[1])));
 	return this;
 };
 
@@ -1046,7 +1252,19 @@ V2.prototype.set$LFloat32Array$ = function (v) {
 		debugger;
 		throw new Error("[mvq.jsx:43:24] assertion failure\n        assert(v.length == 2);\n                        ^^\n");
 	}
-	this.set$NN(v[0], v[1]);
+	this.set$NN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:44:18] null access\n        this.set(v[0], v[1]);\n                  ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:44:24] null access\n        this.set(v[0], v[1]);\n                        ^\n");
+		}
+		return v;
+	}(v[1])));
 	return this;
 };
 
@@ -1074,12 +1292,36 @@ V2.prototype.add$LV2$ = function (v) {
 
 
 V2.prototype.add$AN = function (v) {
-	return this.add$NN(v[0], v[1]);
+	return this.add$NN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:63:52] null access\n    function add(v:number[]) : V2 {return this.add(v[0], v[1]);}\n                                                    ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:63:58] null access\n    function add(v:number[]) : V2 {return this.add(v[0], v[1]);}\n                                                          ^\n");
+		}
+		return v;
+	}(v[1])));
 };
 
 
 V2.prototype.add$LFloat32Array$ = function (v) {
-	return this.add$NN(v[0], v[1]);
+	return this.add$NN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:64:56] null access\n    function add(v:Float32Array) : V2 {return this.add(v[0], v[1]);}\n                                                        ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:64:62] null access\n    function add(v:Float32Array) : V2 {return this.add(v[0], v[1]);}\n                                                              ^\n");
+		}
+		return v;
+	}(v[1])));
 };
 
 
@@ -1096,12 +1338,36 @@ V2.prototype.sub$LV2$ = function (v) {
 
 
 V2.prototype.sub$AN = function (v) {
-	return this.sub$NN(v[0], v[1]);
+	return this.sub$NN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:72:52] null access\n    function sub(v:number[]) : V2 {return this.sub(v[0], v[1]);}\n                                                    ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:72:58] null access\n    function sub(v:number[]) : V2 {return this.sub(v[0], v[1]);}\n                                                          ^\n");
+		}
+		return v;
+	}(v[1])));
 };
 
 
 V2.prototype.sub$LFloat32Array$ = function (v) {
-	return this.sub$NN(v[0], v[1]);
+	return this.sub$NN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:73:56] null access\n    function sub(v:Float32Array) : V2 {return this.sub(v[0], v[1]);}\n                                                        ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:73:62] null access\n    function sub(v:Float32Array) : V2 {return this.sub(v[0], v[1]);}\n                                                              ^\n");
+		}
+		return v;
+	}(v[1])));
 };
 
 
@@ -1118,12 +1384,36 @@ V2.prototype.mul$LV2$ = function (v) {
 
 
 V2.prototype.mul$AN = function (v) {
-	return this.mul$NN(v[0], v[1]);
+	return this.mul$NN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:81:52] null access\n    function mul(v:number[]) : V2 {return this.mul(v[0], v[1]);}\n                                                    ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:81:58] null access\n    function mul(v:number[]) : V2 {return this.mul(v[0], v[1]);}\n                                                          ^\n");
+		}
+		return v;
+	}(v[1])));
 };
 
 
 V2.prototype.mul$LFloat32Array$ = function (v) {
-	return this.mul$NN(v[0], v[1]);
+	return this.mul$NN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:82:56] null access\n    function mul(v:Float32Array) : V2 {return this.mul(v[0], v[1]);}\n                                                        ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:82:62] null access\n    function mul(v:Float32Array) : V2 {return this.mul(v[0], v[1]);}\n                                                              ^\n");
+		}
+		return v;
+	}(v[1])));
 };
 
 
@@ -1323,13 +1613,49 @@ V3.prototype.set$LV3$ = function (v) {
 
 
 V3.prototype.set$AN = function (v) {
-	this.set$NNN(v[0], v[1], v[2]);
+	this.set$NNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:204:45] null access\n    function set(v:number[]) : V3 {this.set(v[0], v[1], v[2]); return this;}\n                                             ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:204:51] null access\n    function set(v:number[]) : V3 {this.set(v[0], v[1], v[2]); return this;}\n                                                   ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:204:57] null access\n    function set(v:number[]) : V3 {this.set(v[0], v[1], v[2]); return this;}\n                                                         ^\n");
+		}
+		return v;
+	}(v[2])));
 	return this;
 };
 
 
 V3.prototype.set$LFloat32Array$ = function (v) {
-	this.set$NNN(v[0], v[1], v[2]);
+	this.set$NNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:205:49] null access\n    function set(v:Float32Array) : V3 {this.set(v[0], v[1], v[2]); return this;}\n                                                 ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:205:55] null access\n    function set(v:Float32Array) : V3 {this.set(v[0], v[1], v[2]); return this;}\n                                                       ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:205:61] null access\n    function set(v:Float32Array) : V3 {this.set(v[0], v[1], v[2]); return this;}\n                                                             ^\n");
+		}
+		return v;
+	}(v[2])));
 	return this;
 };
 
@@ -1358,12 +1684,48 @@ V3.prototype.add$LV3$ = function (v) {
 
 
 V3.prototype.add$AN = function (v) {
-	return this.add$NNN(v[0], v[1], v[2]);
+	return this.add$NNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:223:52] null access\n    function add(v:number[]) : V3 {return this.add(v[0], v[1], v[2]);}\n                                                    ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:223:58] null access\n    function add(v:number[]) : V3 {return this.add(v[0], v[1], v[2]);}\n                                                          ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:223:64] null access\n    function add(v:number[]) : V3 {return this.add(v[0], v[1], v[2]);}\n                                                                ^\n");
+		}
+		return v;
+	}(v[2])));
 };
 
 
 V3.prototype.add$LFloat32Array$ = function (v) {
-	return this.add$NNN(v[0], v[1], v[2]);
+	return this.add$NNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:224:56] null access\n    function add(v:Float32Array) : V3 {return this.add(v[0], v[1], v[2]);}\n                                                        ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:224:62] null access\n    function add(v:Float32Array) : V3 {return this.add(v[0], v[1], v[2]);}\n                                                              ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:224:68] null access\n    function add(v:Float32Array) : V3 {return this.add(v[0], v[1], v[2]);}\n                                                                    ^\n");
+		}
+		return v;
+	}(v[2])));
 };
 
 
@@ -1381,12 +1743,48 @@ V3.prototype.sub$LV3$ = function (v) {
 
 
 V3.prototype.sub$AN = function (v) {
-	return this.sub$NNN(v[0], v[1], v[2]);
+	return this.sub$NNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:232:52] null access\n    function sub(v:number[]) : V3 {return this.sub(v[0], v[1], v[2]);}\n                                                    ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:232:58] null access\n    function sub(v:number[]) : V3 {return this.sub(v[0], v[1], v[2]);}\n                                                          ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:232:64] null access\n    function sub(v:number[]) : V3 {return this.sub(v[0], v[1], v[2]);}\n                                                                ^\n");
+		}
+		return v;
+	}(v[2])));
 };
 
 
 V3.prototype.sub$LFloat32Array$ = function (v) {
-	return this.sub$NNN(v[0], v[1], v[2]);
+	return this.sub$NNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:233:56] null access\n    function sub(v:Float32Array) : V3 {return this.sub(v[0], v[1], v[2]);}\n                                                        ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:233:62] null access\n    function sub(v:Float32Array) : V3 {return this.sub(v[0], v[1], v[2]);}\n                                                              ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:233:68] null access\n    function sub(v:Float32Array) : V3 {return this.sub(v[0], v[1], v[2]);}\n                                                                    ^\n");
+		}
+		return v;
+	}(v[2])));
 };
 
 
@@ -1404,12 +1802,48 @@ V3.prototype.mul$LV3$ = function (v) {
 
 
 V3.prototype.mul$AN = function (v) {
-	return this.mul$NNN(v[0], v[1], v[2]);
+	return this.mul$NNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:241:52] null access\n    function mul(v:number[]) : V3 {return this.mul(v[0], v[1], v[2]);}\n                                                    ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:241:58] null access\n    function mul(v:number[]) : V3 {return this.mul(v[0], v[1], v[2]);}\n                                                          ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:241:64] null access\n    function mul(v:number[]) : V3 {return this.mul(v[0], v[1], v[2]);}\n                                                                ^\n");
+		}
+		return v;
+	}(v[2])));
 };
 
 
 V3.prototype.mul$LFloat32Array$ = function (v) {
-	return this.mul$NNN(v[0], v[1], v[2]);
+	return this.mul$NNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:242:56] null access\n    function mul(v:Float32Array) : V3 {return this.mul(v[0], v[1], v[2]);}\n                                                        ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:242:62] null access\n    function mul(v:Float32Array) : V3 {return this.mul(v[0], v[1], v[2]);}\n                                                              ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:242:68] null access\n    function mul(v:Float32Array) : V3 {return this.mul(v[0], v[1], v[2]);}\n                                                                    ^\n");
+		}
+		return v;
+	}(v[2])));
 };
 
 
@@ -1637,13 +2071,61 @@ V4.prototype.set$LV4$ = function (v) {
 
 
 V4.prototype.set$AN = function (v) {
-	this.set$NNNN(v[0], v[1], v[2], v[3]);
+	this.set$NNNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:375:45] null access\n    function set(v:number[]) : V4 {this.set(v[0], v[1], v[2], v[3]); return this;}\n                                             ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:375:51] null access\n    function set(v:number[]) : V4 {this.set(v[0], v[1], v[2], v[3]); return this;}\n                                                   ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:375:57] null access\n    function set(v:number[]) : V4 {this.set(v[0], v[1], v[2], v[3]); return this;}\n                                                         ^\n");
+		}
+		return v;
+	}(v[2])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:375:63] null access\n    function set(v:number[]) : V4 {this.set(v[0], v[1], v[2], v[3]); return this;}\n                                                               ^\n");
+		}
+		return v;
+	}(v[3])));
 	return this;
 };
 
 
 V4.prototype.set$LFloat32Array$ = function (v) {
-	this.set$NNNN(v[0], v[1], v[2], v[3]);
+	this.set$NNNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:376:49] null access\n    function set(v:Float32Array) : V4 {this.set(v[0], v[1], v[2], v[3]); return this;}\n                                                 ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:376:55] null access\n    function set(v:Float32Array) : V4 {this.set(v[0], v[1], v[2], v[3]); return this;}\n                                                       ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:376:61] null access\n    function set(v:Float32Array) : V4 {this.set(v[0], v[1], v[2], v[3]); return this;}\n                                                             ^\n");
+		}
+		return v;
+	}(v[2])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:376:67] null access\n    function set(v:Float32Array) : V4 {this.set(v[0], v[1], v[2], v[3]); return this;}\n                                                                   ^\n");
+		}
+		return v;
+	}(v[3])));
 	return this;
 };
 
@@ -1673,12 +2155,60 @@ V4.prototype.add$LV4$ = function (v) {
 
 
 V4.prototype.add$AN = function (v) {
-	return this.add$NNNN(v[0], v[1], v[2], v[3]);
+	return this.add$NNNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:395:52] null access\n    function add(v:number[]) : V4 {return this.add(v[0], v[1], v[2], v[3]);}\n                                                    ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:395:58] null access\n    function add(v:number[]) : V4 {return this.add(v[0], v[1], v[2], v[3]);}\n                                                          ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:395:64] null access\n    function add(v:number[]) : V4 {return this.add(v[0], v[1], v[2], v[3]);}\n                                                                ^\n");
+		}
+		return v;
+	}(v[2])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:395:70] null access\n    function add(v:number[]) : V4 {return this.add(v[0], v[1], v[2], v[3]);}\n                                                                      ^\n");
+		}
+		return v;
+	}(v[3])));
 };
 
 
 V4.prototype.add$LFloat32Array$ = function (v) {
-	return this.add$NNNN(v[0], v[1], v[2], v[3]);
+	return this.add$NNNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:396:56] null access\n    function add(v:Float32Array) : V4 {return this.add(v[0], v[1], v[2], v[3]);}\n                                                        ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:396:62] null access\n    function add(v:Float32Array) : V4 {return this.add(v[0], v[1], v[2], v[3]);}\n                                                              ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:396:68] null access\n    function add(v:Float32Array) : V4 {return this.add(v[0], v[1], v[2], v[3]);}\n                                                                    ^\n");
+		}
+		return v;
+	}(v[2])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:396:74] null access\n    function add(v:Float32Array) : V4 {return this.add(v[0], v[1], v[2], v[3]);}\n                                                                          ^\n");
+		}
+		return v;
+	}(v[3])));
 };
 
 
@@ -1697,12 +2227,60 @@ V4.prototype.sub$LV4$ = function (v) {
 
 
 V4.prototype.sub$AN = function (v) {
-	return this.sub$NNNN(v[0], v[1], v[2], v[3]);
+	return this.sub$NNNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:404:52] null access\n    function sub(v:number[]) : V4 {return this.sub(v[0], v[1], v[2], v[3]);}\n                                                    ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:404:58] null access\n    function sub(v:number[]) : V4 {return this.sub(v[0], v[1], v[2], v[3]);}\n                                                          ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:404:64] null access\n    function sub(v:number[]) : V4 {return this.sub(v[0], v[1], v[2], v[3]);}\n                                                                ^\n");
+		}
+		return v;
+	}(v[2])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:404:70] null access\n    function sub(v:number[]) : V4 {return this.sub(v[0], v[1], v[2], v[3]);}\n                                                                      ^\n");
+		}
+		return v;
+	}(v[3])));
 };
 
 
 V4.prototype.sub$LFloat32Array$ = function (v) {
-	return this.sub$NNNN(v[0], v[1], v[2], v[3]);
+	return this.sub$NNNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:405:56] null access\n    function sub(v:Float32Array) : V4 {return this.sub(v[0], v[1], v[2], v[3]);}\n                                                        ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:405:62] null access\n    function sub(v:Float32Array) : V4 {return this.sub(v[0], v[1], v[2], v[3]);}\n                                                              ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:405:68] null access\n    function sub(v:Float32Array) : V4 {return this.sub(v[0], v[1], v[2], v[3]);}\n                                                                    ^\n");
+		}
+		return v;
+	}(v[2])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:405:74] null access\n    function sub(v:Float32Array) : V4 {return this.sub(v[0], v[1], v[2], v[3]);}\n                                                                          ^\n");
+		}
+		return v;
+	}(v[3])));
 };
 
 
@@ -1721,12 +2299,60 @@ V4.prototype.mul$LV4$ = function (v) {
 
 
 V4.prototype.mul$AN = function (v) {
-	return this.mul$NNNN(v[0], v[1], v[2], v[3]);
+	return this.mul$NNNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:413:52] null access\n    function mul(v:number[]) : V4 {return this.mul(v[0], v[1], v[2], v[3]);}\n                                                    ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:413:58] null access\n    function mul(v:number[]) : V4 {return this.mul(v[0], v[1], v[2], v[3]);}\n                                                          ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:413:64] null access\n    function mul(v:number[]) : V4 {return this.mul(v[0], v[1], v[2], v[3]);}\n                                                                ^\n");
+		}
+		return v;
+	}(v[2])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:413:70] null access\n    function mul(v:number[]) : V4 {return this.mul(v[0], v[1], v[2], v[3]);}\n                                                                      ^\n");
+		}
+		return v;
+	}(v[3])));
 };
 
 
 V4.prototype.mul$LFloat32Array$ = function (v) {
-	return this.mul$NNNN(v[0], v[1], v[2], v[3]);
+	return this.mul$NNNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:414:56] null access\n    function mul(v:Float32Array) : V4 {return this.mul(v[0], v[1], v[2], v[3]);}\n                                                        ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:414:62] null access\n    function mul(v:Float32Array) : V4 {return this.mul(v[0], v[1], v[2], v[3]);}\n                                                              ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:414:68] null access\n    function mul(v:Float32Array) : V4 {return this.mul(v[0], v[1], v[2], v[3]);}\n                                                                    ^\n");
+		}
+		return v;
+	}(v[2])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:414:74] null access\n    function mul(v:Float32Array) : V4 {return this.mul(v[0], v[1], v[2], v[3]);}\n                                                                          ^\n");
+		}
+		return v;
+	}(v[3])));
 };
 
 
@@ -1990,19 +2616,67 @@ M22.prototype.set$LM22$ = function (m) {
 
 
 M22.prototype.set$AN = function (m) {
-	this.m11 = m[0];
-	this.m21 = m[1];
-	this.m12 = m[2];
-	this.m22 = m[3];
+	this.m11 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:550:20] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m12 = m[2]; this.m22 = m[3];\n                    ^\n");
+		}
+		return v;
+	}(m[0]));
+	this.m21 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:550:37] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m12 = m[2]; this.m22 = m[3];\n                                     ^\n");
+		}
+		return v;
+	}(m[1]));
+	this.m12 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:550:54] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m12 = m[2]; this.m22 = m[3];\n                                                      ^\n");
+		}
+		return v;
+	}(m[2]));
+	this.m22 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:550:71] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m12 = m[2]; this.m22 = m[3];\n                                                                       ^\n");
+		}
+		return v;
+	}(m[3]));
 	return this;
 };
 
 
 M22.prototype.set$LFloat32Array$ = function (m) {
-	this.m11 = m[0];
-	this.m21 = m[1];
-	this.m12 = m[2];
-	this.m22 = m[3];
+	this.m11 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:554:20] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m12 = m[2]; this.m22 = m[3];\n                    ^\n");
+		}
+		return v;
+	}(m[0]));
+	this.m21 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:554:37] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m12 = m[2]; this.m22 = m[3];\n                                     ^\n");
+		}
+		return v;
+	}(m[1]));
+	this.m12 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:554:54] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m12 = m[2]; this.m22 = m[3];\n                                                      ^\n");
+		}
+		return v;
+	}(m[2]));
+	this.m22 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:554:71] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m12 = m[2]; this.m22 = m[3];\n                                                                       ^\n");
+		}
+		return v;
+	}(m[3]));
 	return this;
 };
 
@@ -2137,12 +2811,36 @@ M22.prototype.setScale$LV2$ = function (v) {
 
 
 M22.prototype.setScale$AN = function (v) {
-	return this.setScale$NN(v[0], v[1]);
+	return this.setScale$NN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:636:63] null access\n    function setScale(v:number[]) : M22 {return this.setScale(v[0], v[1]);}\n                                                               ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:636:69] null access\n    function setScale(v:number[]) : M22 {return this.setScale(v[0], v[1]);}\n                                                                     ^\n");
+		}
+		return v;
+	}(v[1])));
 };
 
 
 M22.prototype.setScale$LFloat32Array$ = function (v) {
-	return this.setScale$NN(v[0], v[1]);
+	return this.setScale$NN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:637:67] null access\n    function setScale(v:Float32Array) : M22 {return this.setScale(v[0], v[1]);}\n                                                                   ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:637:73] null access\n    function setScale(v:Float32Array) : M22 {return this.setScale(v[0], v[1]);}\n                                                                         ^\n");
+		}
+		return v;
+	}(v[1])));
 };
 
 
@@ -2392,29 +3090,137 @@ M33.prototype.set$LM33$ = function (m) {
 
 
 M33.prototype.set$AN = function (m) {
-	this.m11 = m[0];
-	this.m21 = m[1];
-	this.m31 = m[2];
-	this.m12 = m[3];
-	this.m22 = m[4];
-	this.m32 = m[5];
-	this.m13 = m[6];
-	this.m23 = m[7];
-	this.m33 = m[8];
+	this.m11 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:724:20] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m31 = m[2];\n                    ^\n");
+		}
+		return v;
+	}(m[0]));
+	this.m21 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:724:37] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m31 = m[2];\n                                     ^\n");
+		}
+		return v;
+	}(m[1]));
+	this.m31 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:724:54] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m31 = m[2];\n                                                      ^\n");
+		}
+		return v;
+	}(m[2]));
+	this.m12 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:725:20] null access\n        this.m12 = m[3]; this.m22 = m[4]; this.m32 = m[5];\n                    ^\n");
+		}
+		return v;
+	}(m[3]));
+	this.m22 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:725:37] null access\n        this.m12 = m[3]; this.m22 = m[4]; this.m32 = m[5];\n                                     ^\n");
+		}
+		return v;
+	}(m[4]));
+	this.m32 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:725:54] null access\n        this.m12 = m[3]; this.m22 = m[4]; this.m32 = m[5];\n                                                      ^\n");
+		}
+		return v;
+	}(m[5]));
+	this.m13 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:726:20] null access\n        this.m13 = m[6]; this.m23 = m[7]; this.m33 = m[8];\n                    ^\n");
+		}
+		return v;
+	}(m[6]));
+	this.m23 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:726:37] null access\n        this.m13 = m[6]; this.m23 = m[7]; this.m33 = m[8];\n                                     ^\n");
+		}
+		return v;
+	}(m[7]));
+	this.m33 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:726:54] null access\n        this.m13 = m[6]; this.m23 = m[7]; this.m33 = m[8];\n                                                      ^\n");
+		}
+		return v;
+	}(m[8]));
 	return this;
 };
 
 
 M33.prototype.set$LFloat32Array$ = function (m) {
-	this.m11 = m[0];
-	this.m21 = m[1];
-	this.m31 = m[2];
-	this.m12 = m[3];
-	this.m22 = m[4];
-	this.m32 = m[5];
-	this.m13 = m[6];
-	this.m23 = m[7];
-	this.m33 = m[8];
+	this.m11 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:730:20] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m31 = m[2];\n                    ^\n");
+		}
+		return v;
+	}(m[0]));
+	this.m21 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:730:37] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m31 = m[2];\n                                     ^\n");
+		}
+		return v;
+	}(m[1]));
+	this.m31 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:730:54] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m31 = m[2];\n                                                      ^\n");
+		}
+		return v;
+	}(m[2]));
+	this.m12 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:731:20] null access\n        this.m12 = m[3]; this.m22 = m[4]; this.m32 = m[5];\n                    ^\n");
+		}
+		return v;
+	}(m[3]));
+	this.m22 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:731:37] null access\n        this.m12 = m[3]; this.m22 = m[4]; this.m32 = m[5];\n                                     ^\n");
+		}
+		return v;
+	}(m[4]));
+	this.m32 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:731:54] null access\n        this.m12 = m[3]; this.m22 = m[4]; this.m32 = m[5];\n                                                      ^\n");
+		}
+		return v;
+	}(m[5]));
+	this.m13 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:732:20] null access\n        this.m13 = m[6]; this.m23 = m[7]; this.m33 = m[8];\n                    ^\n");
+		}
+		return v;
+	}(m[6]));
+	this.m23 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:732:37] null access\n        this.m13 = m[6]; this.m23 = m[7]; this.m33 = m[8];\n                                     ^\n");
+		}
+		return v;
+	}(m[7]));
+	this.m33 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:732:54] null access\n        this.m13 = m[6]; this.m23 = m[7]; this.m33 = m[8];\n                                                      ^\n");
+		}
+		return v;
+	}(m[8]));
 	return this;
 };
 
@@ -2623,12 +3429,48 @@ M33.prototype.setScale$LV3$ = function (v) {
 
 
 M33.prototype.setScale$AN = function (v) {
-	return this.setScale$NNN(v[0], v[1], v[2]);
+	return this.setScale$NNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:851:63] null access\n    function setScale(v:number[]) : M33 {return this.setScale(v[0], v[1], v[2]);}\n                                                               ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:851:69] null access\n    function setScale(v:number[]) : M33 {return this.setScale(v[0], v[1], v[2]);}\n                                                                     ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:851:75] null access\n    function setScale(v:number[]) : M33 {return this.setScale(v[0], v[1], v[2]);}\n                                                                           ^\n");
+		}
+		return v;
+	}(v[2])));
 };
 
 
 M33.prototype.setScale$LFloat32Array$ = function (v) {
-	return this.setScale$NNN(v[0], v[1], v[2]);
+	return this.setScale$NNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:852:67] null access\n    function setScale(v:Float32Array) : M33 {return this.setScale(v[0], v[1], v[2]);}\n                                                                   ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:852:73] null access\n    function setScale(v:Float32Array) : M33 {return this.setScale(v[0], v[1], v[2]);}\n                                                                         ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:852:79] null access\n    function setScale(v:Float32Array) : M33 {return this.setScale(v[0], v[1], v[2]);}\n                                                                               ^\n");
+		}
+		return v;
+	}(v[2])));
 };
 
 
@@ -3023,43 +3865,235 @@ M44.prototype.set$LM44$ = function (m) {
 
 
 M44.prototype.set$AN = function (m) {
-	this.m11 = m[0];
-	this.m21 = m[1];
-	this.m31 = m[2];
-	this.m41 = m[3];
-	this.m12 = m[4];
-	this.m22 = m[5];
-	this.m32 = m[6];
-	this.m42 = m[7];
-	this.m13 = m[8];
-	this.m23 = m[9];
-	this.m33 = m[10];
-	this.m43 = m[11];
-	this.m14 = m[12];
-	this.m24 = m[13];
-	this.m34 = m[14];
-	this.m44 = m[15];
+	this.m11 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:972:20] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m31 = m[2]; this.m41 = m[3];\n                    ^\n");
+		}
+		return v;
+	}(m[0]));
+	this.m21 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:972:37] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m31 = m[2]; this.m41 = m[3];\n                                     ^\n");
+		}
+		return v;
+	}(m[1]));
+	this.m31 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:972:54] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m31 = m[2]; this.m41 = m[3];\n                                                      ^\n");
+		}
+		return v;
+	}(m[2]));
+	this.m41 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:972:71] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m31 = m[2]; this.m41 = m[3];\n                                                                       ^\n");
+		}
+		return v;
+	}(m[3]));
+	this.m12 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:973:20] null access\n        this.m12 = m[4]; this.m22 = m[5]; this.m32 = m[6]; this.m42 = m[7];\n                    ^\n");
+		}
+		return v;
+	}(m[4]));
+	this.m22 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:973:37] null access\n        this.m12 = m[4]; this.m22 = m[5]; this.m32 = m[6]; this.m42 = m[7];\n                                     ^\n");
+		}
+		return v;
+	}(m[5]));
+	this.m32 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:973:54] null access\n        this.m12 = m[4]; this.m22 = m[5]; this.m32 = m[6]; this.m42 = m[7];\n                                                      ^\n");
+		}
+		return v;
+	}(m[6]));
+	this.m42 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:973:71] null access\n        this.m12 = m[4]; this.m22 = m[5]; this.m32 = m[6]; this.m42 = m[7];\n                                                                       ^\n");
+		}
+		return v;
+	}(m[7]));
+	this.m13 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:974:20] null access\n        this.m13 = m[8]; this.m23 = m[9]; this.m33 = m[10]; this.m43 = m[11];\n                    ^\n");
+		}
+		return v;
+	}(m[8]));
+	this.m23 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:974:37] null access\n        this.m13 = m[8]; this.m23 = m[9]; this.m33 = m[10]; this.m43 = m[11];\n                                     ^\n");
+		}
+		return v;
+	}(m[9]));
+	this.m33 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:974:54] null access\n        this.m13 = m[8]; this.m23 = m[9]; this.m33 = m[10]; this.m43 = m[11];\n                                                      ^\n");
+		}
+		return v;
+	}(m[10]));
+	this.m43 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:974:72] null access\n        this.m13 = m[8]; this.m23 = m[9]; this.m33 = m[10]; this.m43 = m[11];\n                                                                        ^\n");
+		}
+		return v;
+	}(m[11]));
+	this.m14 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:975:20] null access\n        this.m14 = m[12]; this.m24 = m[13]; this.m34 = m[14]; this.m44 = m[15];\n                    ^\n");
+		}
+		return v;
+	}(m[12]));
+	this.m24 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:975:38] null access\n        this.m14 = m[12]; this.m24 = m[13]; this.m34 = m[14]; this.m44 = m[15];\n                                      ^\n");
+		}
+		return v;
+	}(m[13]));
+	this.m34 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:975:56] null access\n        this.m14 = m[12]; this.m24 = m[13]; this.m34 = m[14]; this.m44 = m[15];\n                                                        ^\n");
+		}
+		return v;
+	}(m[14]));
+	this.m44 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:975:74] null access\n        this.m14 = m[12]; this.m24 = m[13]; this.m34 = m[14]; this.m44 = m[15];\n                                                                          ^\n");
+		}
+		return v;
+	}(m[15]));
 	return this;
 };
 
 
 M44.prototype.set$LFloat32Array$ = function (m) {
-	this.m11 = m[0];
-	this.m21 = m[1];
-	this.m31 = m[2];
-	this.m41 = m[3];
-	this.m12 = m[4];
-	this.m22 = m[5];
-	this.m32 = m[6];
-	this.m42 = m[7];
-	this.m13 = m[8];
-	this.m23 = m[9];
-	this.m33 = m[10];
-	this.m43 = m[11];
-	this.m14 = m[12];
-	this.m24 = m[13];
-	this.m34 = m[14];
-	this.m44 = m[15];
+	this.m11 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:979:20] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m31 = m[2]; this.m41 = m[3];\n                    ^\n");
+		}
+		return v;
+	}(m[0]));
+	this.m21 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:979:37] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m31 = m[2]; this.m41 = m[3];\n                                     ^\n");
+		}
+		return v;
+	}(m[1]));
+	this.m31 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:979:54] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m31 = m[2]; this.m41 = m[3];\n                                                      ^\n");
+		}
+		return v;
+	}(m[2]));
+	this.m41 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:979:71] null access\n        this.m11 = m[0]; this.m21 = m[1]; this.m31 = m[2]; this.m41 = m[3];\n                                                                       ^\n");
+		}
+		return v;
+	}(m[3]));
+	this.m12 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:980:20] null access\n        this.m12 = m[4]; this.m22 = m[5]; this.m32 = m[6]; this.m42 = m[7];\n                    ^\n");
+		}
+		return v;
+	}(m[4]));
+	this.m22 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:980:37] null access\n        this.m12 = m[4]; this.m22 = m[5]; this.m32 = m[6]; this.m42 = m[7];\n                                     ^\n");
+		}
+		return v;
+	}(m[5]));
+	this.m32 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:980:54] null access\n        this.m12 = m[4]; this.m22 = m[5]; this.m32 = m[6]; this.m42 = m[7];\n                                                      ^\n");
+		}
+		return v;
+	}(m[6]));
+	this.m42 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:980:71] null access\n        this.m12 = m[4]; this.m22 = m[5]; this.m32 = m[6]; this.m42 = m[7];\n                                                                       ^\n");
+		}
+		return v;
+	}(m[7]));
+	this.m13 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:981:20] null access\n        this.m13 = m[8]; this.m23 = m[9]; this.m33 = m[10]; this.m43 = m[11];\n                    ^\n");
+		}
+		return v;
+	}(m[8]));
+	this.m23 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:981:37] null access\n        this.m13 = m[8]; this.m23 = m[9]; this.m33 = m[10]; this.m43 = m[11];\n                                     ^\n");
+		}
+		return v;
+	}(m[9]));
+	this.m33 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:981:54] null access\n        this.m13 = m[8]; this.m23 = m[9]; this.m33 = m[10]; this.m43 = m[11];\n                                                      ^\n");
+		}
+		return v;
+	}(m[10]));
+	this.m43 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:981:72] null access\n        this.m13 = m[8]; this.m23 = m[9]; this.m33 = m[10]; this.m43 = m[11];\n                                                                        ^\n");
+		}
+		return v;
+	}(m[11]));
+	this.m14 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:982:20] null access\n        this.m14 = m[12]; this.m24 = m[13]; this.m34 = m[14]; this.m44 = m[15];\n                    ^\n");
+		}
+		return v;
+	}(m[12]));
+	this.m24 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:982:38] null access\n        this.m14 = m[12]; this.m24 = m[13]; this.m34 = m[14]; this.m44 = m[15];\n                                      ^\n");
+		}
+		return v;
+	}(m[13]));
+	this.m34 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:982:56] null access\n        this.m14 = m[12]; this.m24 = m[13]; this.m34 = m[14]; this.m44 = m[15];\n                                                        ^\n");
+		}
+		return v;
+	}(m[14]));
+	this.m44 = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:982:74] null access\n        this.m14 = m[12]; this.m24 = m[13]; this.m34 = m[14]; this.m44 = m[15];\n                                                                          ^\n");
+		}
+		return v;
+	}(m[15]));
 	return this;
 };
 
@@ -3361,12 +4395,48 @@ M44.prototype.setTranslation$LV3$ = function (v) {
 
 
 M44.prototype.setTranslation$AN = function (v) {
-	return this.setTranslation$NNN(v[0], v[1], v[2]);
+	return this.setTranslation$NNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1164:75] null access\n    function setTranslation(v:number[]) : M44 {return this.setTranslation(v[0], v[1], v[2]);}\n                                                                           ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1164:81] null access\n    function setTranslation(v:number[]) : M44 {return this.setTranslation(v[0], v[1], v[2]);}\n                                                                                 ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1164:87] null access\n    function setTranslation(v:number[]) : M44 {return this.setTranslation(v[0], v[1], v[2]);}\n                                                                                       ^\n");
+		}
+		return v;
+	}(v[2])));
 };
 
 
 M44.prototype.setTranslation$LFloat32Array$ = function (v) {
-	return this.setTranslation$NNN(v[0], v[1], v[2]);
+	return this.setTranslation$NNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1165:79] null access\n    function setTranslation(v:Float32Array) : M44 {return this.setTranslation(v[0], v[1], v[2]);}\n                                                                               ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1165:85] null access\n    function setTranslation(v:Float32Array) : M44 {return this.setTranslation(v[0], v[1], v[2]);}\n                                                                                     ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1165:91] null access\n    function setTranslation(v:Float32Array) : M44 {return this.setTranslation(v[0], v[1], v[2]);}\n                                                                                           ^\n");
+		}
+		return v;
+	}(v[2])));
 };
 
 
@@ -3415,12 +4485,48 @@ M44.prototype.setScale$LV3$ = function (v) {
 
 
 M44.prototype.setScale$AN = function (v) {
-	return this.setScale$NNN(v[0], v[1], v[2]);
+	return this.setScale$NNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1181:63] null access\n    function setScale(v:number[]) : M44 {return this.setScale(v[0], v[1], v[2]);}\n                                                               ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1181:69] null access\n    function setScale(v:number[]) : M44 {return this.setScale(v[0], v[1], v[2]);}\n                                                                     ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1181:75] null access\n    function setScale(v:number[]) : M44 {return this.setScale(v[0], v[1], v[2]);}\n                                                                           ^\n");
+		}
+		return v;
+	}(v[2])));
 };
 
 
 M44.prototype.setScale$LFloat32Array$ = function (v) {
-	return this.setScale$NNN(v[0], v[1], v[2]);
+	return this.setScale$NNN((function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1182:67] null access\n    function setScale(v:Float32Array) : M44 {return this.setScale(v[0], v[1], v[2]);}\n                                                                   ^\n");
+		}
+		return v;
+	}(v[0])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1182:73] null access\n    function setScale(v:Float32Array) : M44 {return this.setScale(v[0], v[1], v[2]);}\n                                                                         ^\n");
+		}
+		return v;
+	}(v[1])), (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1182:79] null access\n    function setScale(v:Float32Array) : M44 {return this.setScale(v[0], v[1], v[2]);}\n                                                                               ^\n");
+		}
+		return v;
+	}(v[2])));
 };
 
 
@@ -3699,19 +4805,67 @@ Quat.prototype.set$LQuat$ = function (q) {
 
 
 Quat.prototype.set$AN = function (q) {
-	this.w = q[0];
-	this.x = q[1];
-	this.y = q[2];
-	this.z = q[3];
+	this.w = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1289:18] null access\n        this.w = q[0]; this.x = q[1]; this.y = q[2]; this.z = q[3];\n                  ^\n");
+		}
+		return v;
+	}(q[0]));
+	this.x = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1289:33] null access\n        this.w = q[0]; this.x = q[1]; this.y = q[2]; this.z = q[3];\n                                 ^\n");
+		}
+		return v;
+	}(q[1]));
+	this.y = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1289:48] null access\n        this.w = q[0]; this.x = q[1]; this.y = q[2]; this.z = q[3];\n                                                ^\n");
+		}
+		return v;
+	}(q[2]));
+	this.z = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1289:63] null access\n        this.w = q[0]; this.x = q[1]; this.y = q[2]; this.z = q[3];\n                                                               ^\n");
+		}
+		return v;
+	}(q[3]));
 	return this;
 };
 
 
 Quat.prototype.set$LFloat32Array$ = function (q) {
-	this.w = q[0];
-	this.x = q[1];
-	this.y = q[2];
-	this.z = q[3];
+	this.w = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1293:18] null access\n        this.w = q[0]; this.x = q[1]; this.y = q[2]; this.z = q[3];\n                  ^\n");
+		}
+		return v;
+	}(q[0]));
+	this.x = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1293:33] null access\n        this.w = q[0]; this.x = q[1]; this.y = q[2]; this.z = q[3];\n                                 ^\n");
+		}
+		return v;
+	}(q[1]));
+	this.y = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1293:48] null access\n        this.w = q[0]; this.x = q[1]; this.y = q[2]; this.z = q[3];\n                                                ^\n");
+		}
+		return v;
+	}(q[2]));
+	this.z = (function (v) {
+		if (! (v != null)) {
+			debugger;
+			throw new Error("[mvq.jsx:1293:63] null access\n        this.w = q[0]; this.x = q[1]; this.y = q[2]; this.z = q[3];\n                                                               ^\n");
+		}
+		return v;
+	}(q[3]));
 	return this;
 };
 
@@ -3922,7 +5076,13 @@ $__jsx_lazy_init(dom, "window", function () {
 	return js$0.global.window;
 });
 $__jsx_lazy_init(dom, "document", function () {
-	return js$0.global.document;
+	return (function ($v) {
+		if (! ($v == null || $v instanceof HTMLDocument)) {
+			debugger;
+			throw new Error("[c:/Users/haga.takeshi/AppData/Roaming/npm/node_modules/jsx/lib/js/js/web.jsx:23:50] detected invalid cast, value is not an instance of the designated type or null\n    static const document = js.global[\"document\"] as __noconvert__ HTMLDocument;\n                                                  ^^\n");
+		}
+		return $v;
+	}(js$0.global.document));
 });
 $__jsx_lazy_init(Timer, "_requestAnimationFrame", function () {
 	return Timer$_getRequestAnimationFrameImpl$B(true);

@@ -268,6 +268,14 @@ class Iota {
 			binary_reader.readAsBinaryString(file);
 		}
 		
+		// ファイル選択
+		if (input) {
+			input.onchange = function(e:Event):void {
+				files = input.files;
+				setFile(file_index = 0);
+			};
+		}
+		
 		// D&D対応
 		canvas.ondragover = function(e:Event):void {
 			e.preventDefault();
@@ -280,13 +288,6 @@ class Iota {
 			setFile(file_index = 0);
 		};
 		
-		// ファイル選択
-		if (input) {
-			input.onchange = function(e:Event):void {
-				files = input.files;
-				setFile(file_index = 0);
-			};
-		}
 		
 		
 		// Chrome向けホイールイベント登録
@@ -337,21 +338,19 @@ class Iota {
 		};
 		
 		// キー操作
-		dom.window.onkeydown = function(ev:Event):void {
+		dom.window.addEventListener('keydown', function(ev:Event):void {
 			if (!files) return;
 			
 			var kev = ev as KeyboardEvent;
 			switch (kev.keyCode) {
 				default: break;
 				case 37: // ←
-					if (--file_index < 0) file_index = 0;
-					setFile(file_index);
+					if (--file_index >= 0) setFile(file_index); else file_index = 0;
 					break;
 				case 39: // →
-					if (++file_index >= files.length) file_index = files.length - 1;
-					setFile(file_index);
+					if (++file_index < files.length) setFile(file_index); else file_index = files.length - 1;
 					break;
 			}
-		};
+		});
 	}
 }
