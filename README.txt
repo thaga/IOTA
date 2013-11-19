@@ -34,6 +34,7 @@ iota.jsx.jsは、ページ内に"iota-canvas"というidのcanvas要素がある
 　を置く。
 　
 　THETA画像のURLを、data-theta-img属性で指定してください。
+　サイズとは、まぁ、適当に、変更してください。
 
 
 
