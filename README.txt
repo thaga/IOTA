@@ -1,7 +1,8 @@
-【iota.jsxから、iota.jsx.jsを生成する】
-> jsx --disable-type-check --executable web --output iota.jsx.js iota.jsx
+【デモ】
+実行デモがこちらにあります→ http://thaga.github.io/IOTA/
 
---disable-type-checkが必要です。
+左上のボタンでTHETA画像選択(複数選択可)あるいはドラッグ＆ドロップ(複数ドロップ可)すると
+ビューアとして使えます。
 
 
 【自分のwebページにIOTAを組み込む】
@@ -21,6 +22,14 @@
 　
 　IOTAのスクリプトは、ページ内に存在しdata-theta-img属性を持つcanvas要素を探し出し、
 　それぞれにTHETA画像を表示します。
+
+
+【iota.jsxからiota.jsx.jsを生成する(iota.jsxを自分でいじくる人向け)】
+コンパイルにはJSX( http://jsx.github.io/ )が必要です。
+JSXをインストール後、
+　> jsx --disable-type-check --executable web --output iota.jsx.js iota.jsx
+でコンパイルできます。
+--disable-type-checkが必要です。
 
 
 【ライセンス？】
