@@ -47,11 +47,12 @@ class _Main {
 native final class FullScreenHandler {
 	function mozRequestFullScreen():void;
 	function webkitRequestFullScreen():void;
+	var onwebkitfullscreenchange:Nullable.<function(:Event):void>;
 }
 
 class Iota {
 	var draw = null:function():void;
-	function constructor(canvas:HTMLCanvasElement, input:HTMLInputElement, init_img:HTMLImageElement = null) {
+	function constructor(canvas:HTMLCanvasElement, input:HTMLInputElement, init_img:HTMLImageElement = null, fish_eye:boolean = false) {
 		// 全球の分割数 横・縦
 		var hdiv = 128;
 		var vdiv = 64;
@@ -101,6 +102,7 @@ class Iota {
 		gl.shaderSource(vs, """
 			precision mediump float;
 			uniform mat4 projectionMatrix;
+			uniform mat4 modelviewMatrix;
 			attribute vec2 position;
 			varying vec2 v_texcoord;
 			void main() {
@@ -109,11 +111,35 @@ class Iota {
 				float hc = cos(h), hs = sin(h);
 				float vc = cos(v), vs = sin(v);
 				v_texcoord = position;
-				gl_Position = projectionMatrix * vec4(vc * hc, vs, vc * hs, 1.0);
+				gl_Position = projectionMatrix * modelviewMatrix * vec4(vc * hc, vs, vc * hs, 1.0);
 			}
 		""");
 		gl.compileShader(vs);
 		if (!(gl.getShaderParameter(vs, gl.COMPILE_STATUS) as boolean)) console.log(gl.getShaderInfoLog(vs));
+		
+		// 魚眼頂点シェーダを作成
+		var vs2 = gl.createShader(gl.VERTEX_SHADER);
+		gl.shaderSource(vs2, """
+			precision mediump float;
+			uniform mat4 projectionMatrix;
+			uniform mat4 modelviewMatrix;
+			attribute vec2 position;
+			varying vec2 v_texcoord;
+			void main() {
+				v_texcoord = position;
+				float n = -projectionMatrix[3][2] - 1.0;
+				float h = (position.x + 0.25) * 3.14159265 * 2.0;
+				float v = (position.y - 0.5) * 3.14159265;
+				float hc = cos(h), hs = sin(h);
+				float vc = cos(v), vs = sin(v);
+				vec3 p = (modelviewMatrix * vec4(vc * hc, vs, vc * hs, 1.0)).xyz;
+				float xy2 = dot(p.xy, p.xy);
+				float d = dot(p, p);
+				gl_Position = projectionMatrix * vec4(p.x * (d + p.z) / xy2, p.y * (d + p.z) / xy2, p.z - n - 0.9, 1.0);
+			}
+		""");
+		gl.compileShader(vs2);
+		if (!(gl.getShaderParameter(vs2, gl.COMPILE_STATUS) as boolean)) console.log(gl.getShaderInfoLog(vs2));
 		
 		// フラグメントシェーダを作成
 		var fs = gl.createShader(gl.FRAGMENT_SHADER);
@@ -130,7 +156,7 @@ class Iota {
 		
 		// シェーダプログラムを作成
 		var prog = gl.createProgram();
-		gl.attachShader(prog, vs);
+		gl.attachShader(prog, fish_eye ? vs2 : vs);
 		gl.attachShader(prog, fs);
 		gl.linkProgram(prog);
 		if (!(gl.getProgramParameter(prog, gl.LINK_STATUS) as boolean)) console.log(gl.getProgramInfoLog(prog));
@@ -162,8 +188,14 @@ class Iota {
 			gl.uniformMatrix4fv(
 				gl.getUniformLocation(prog, 'projectionMatrix'),
 				false,
-				M44.frustum(-0.1 * hr, 0.1 * hr, -0.1 * vr, 0.1 * vr, near, 1.1)
-				.mul(M44.rotationX(-view_p))
+				fish_eye
+					? M44.ortho(-hr, hr, -vr, vr, near, near + 2).array()
+				    : M44.frustum(-0.1 * hr, 0.1 * hr, -0.1 * vr, 0.1 * vr, near, 1.1).array()
+			);
+			gl.uniformMatrix4fv(
+				gl.getUniformLocation(prog, 'modelviewMatrix'),
+				false,
+				M44.rotationX(-view_p)
 				.mul(M44.rotationY(-view_h))
 				.mul(M44.rotationX(z_y))
 				.mul(M44.rotationZ(-z_x))
@@ -339,10 +371,62 @@ class Iota {
 		};
 		
 		// ダブルクリックでフルスクリーン
+		var full_screen = false;
+		var full_added = false;
+		var full_w = 0;
+		var full_h = 0;
 		canvas.ondblclick = function(ev:Event):void {
 			var c = canvas as variant as Map.<variant>;
-			if (c['mozRequestFullScreen']) (canvas as variant as FullScreenHandler).mozRequestFullScreen();
-			if (c['webkitRequestFullScreen']) (canvas as variant as FullScreenHandler).webkitRequestFullScreen();
+			var fsh = canvas as variant as FullScreenHandler;
+			
+			// Firefox用フルスクリーン処理
+			if (c['mozRequestFullScreen']) {
+				function fullscreen_func(ev:Event):void{
+					if (full_screen) {
+						canvas.width = full_w;
+						canvas.height = full_h;
+						full_screen = false;
+					} else {
+						var fse = (dom.document as variant as Map.<variant>)['mozFullScreenElement'] as HTMLCanvasElement;
+						if (fse == canvas) {
+							canvas.width = dom.window.innerWidth;
+							canvas.height = dom.window.innerHeight;
+							full_screen = true;
+						}
+					}
+					draw();
+				};
+				if (!full_added) {
+					dom.document.addEventListener('mozfullscreenchange', fullscreen_func);
+					full_added = true;
+				}
+				if (!full_screen) {
+					full_w = canvas.width;
+					full_h = canvas.height;
+					fsh.mozRequestFullScreen();
+				}
+			}
+			
+			// Chrome用フルスクリーン処理
+			if (c['webkitRequestFullScreen']) {
+				if (!full_screen) {
+					fsh.onwebkitfullscreenchange = function(ev:Event):void{
+						full_screen = true;
+						var w = canvas.width;
+						var h = canvas.height;
+						canvas.width = dom.window.innerWidth;
+						canvas.height = dom.window.innerHeight;
+						draw();
+						fsh.onwebkitfullscreenchange = function(ev:Event):void{
+							full_screen = false;
+							canvas.width = w;
+							canvas.height = h;
+							draw();
+						};
+					};
+					fsh.webkitRequestFullScreen();
+				}
+			}
 		};
 		
 		// キー操作

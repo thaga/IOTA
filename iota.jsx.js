@@ -126,7 +126,7 @@ function _Main$main$AS(args) {
 		canvas.style.left = '0px';
 		canvas.style.top = '0px';
 		input = dom$id$S('iota_input');
-		iota = new Iota$0(canvas, input);
+		iota = new Iota$1(canvas, input);
 		canvas.width = dom.window.innerWidth;
 		canvas.height = dom.window.innerHeight;
 		dom.window.onresize = (function (ev) {
@@ -144,7 +144,7 @@ function _Main$main$AS(args) {
 				var img;
 				img = dom.window.document.createElement('img');
 				img.onload = (function (ev) {
-					new Iota(canvas, null, img);
+					new Iota$0(canvas, null, img);
 				});
 				img.src = url;
 			})(elem, theta_url);
@@ -155,7 +155,7 @@ function _Main$main$AS(args) {
 _Main.main = _Main$main$AS;
 _Main.main$AS = _Main$main$AS;
 
-function Iota(canvas, input, init_img) {
+function Iota(canvas, input, init_img, fish_eye) {
 	var $this = this;
 	var hdiv;
 	var vdiv;
@@ -166,6 +166,7 @@ function Iota(canvas, input, init_img) {
 	var lattice_index_buf;
 	var lattice_index_array;
 	var vs;
+	var vs2;
 	var fs;
 	var prog;
 	var texture;
@@ -183,6 +184,10 @@ function Iota(canvas, input, init_img) {
 	var left_down;
 	var left_last_x;
 	var left_last_y;
+	var full_screen;
+	var full_added;
+	var full_w;
+	var full_h;
 	this.draw = null;
 	hdiv = 128;
 	vdiv = 64;
@@ -227,10 +232,16 @@ function Iota(canvas, input, init_img) {
 	gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray(0);
 	vs = gl.createShader(gl.VERTEX_SHADER);
-	gl.shaderSource(vs, "\n			precision mediump float;\n			uniform mat4 projectionMatrix;\n			attribute vec2 position;\n			varying vec2 v_texcoord;\n			void main() {\n				float h = (position.x + 0.25) * 3.14159265 * 2.0;\n				float v = (position.y - 0.5) * 3.14159265;\n				float hc = cos(h), hs = sin(h);\n				float vc = cos(v), vs = sin(v);\n				v_texcoord = position;\n				gl_Position = projectionMatrix * vec4(vc * hc, vs, vc * hs, 1.0);\n			}\n		");
+	gl.shaderSource(vs, "\n			precision mediump float;\n			uniform mat4 projectionMatrix;\n			uniform mat4 modelviewMatrix;\n			attribute vec2 position;\n			varying vec2 v_texcoord;\n			void main() {\n				float h = (position.x + 0.25) * 3.14159265 * 2.0;\n				float v = (position.y - 0.5) * 3.14159265;\n				float hc = cos(h), hs = sin(h);\n				float vc = cos(v), vs = sin(v);\n				v_texcoord = position;\n				gl_Position = projectionMatrix * modelviewMatrix * vec4(vc * hc, vs, vc * hs, 1.0);\n			}\n		");
 	gl.compileShader(vs);
 	if (! (!! gl.getShaderParameter(vs, gl.COMPILE_STATUS))) {
 		console.log(gl.getShaderInfoLog(vs));
+	}
+	vs2 = gl.createShader(gl.VERTEX_SHADER);
+	gl.shaderSource(vs2, "\n			precision mediump float;\n			uniform mat4 projectionMatrix;\n			uniform mat4 modelviewMatrix;\n			attribute vec2 position;\n			varying vec2 v_texcoord;\n			void main() {\n				v_texcoord = position;\n				float n = -projectionMatrix[3][2] - 1.0;\n				float h = (position.x + 0.25) * 3.14159265 * 2.0;\n				float v = (position.y - 0.5) * 3.14159265;\n				float hc = cos(h), hs = sin(h);\n				float vc = cos(v), vs = sin(v);\n				vec3 p = (modelviewMatrix * vec4(vc * hc, vs, vc * hs, 1.0)).xyz;\n//				float theta = atan(p.y, p.x);\n//				float n = -projectionMatrix[3][2] - 1.0;\n//				float r = acos(-p.z) * n * 5.0;\n//				gl_Position = projectionMatrix * vec4(r * cos(theta), r * sin(theta), p.z - n - 0.9, 1.0);\n				float xy2 = dot(p.xy, p.xy);\n				float d = dot(p, p);\n				gl_Position = projectionMatrix * vec4(p.x * (d + p.z) / xy2, p.y * (d + p.z) / xy2, p.z - n - 0.9, 1.0);\n			}\n		");
+	gl.compileShader(vs2);
+	if (! (!! gl.getShaderParameter(vs2, gl.COMPILE_STATUS))) {
+		console.log(gl.getShaderInfoLog(vs2));
 	}
 	fs = gl.createShader(gl.FRAGMENT_SHADER);
 	gl.shaderSource(fs, "\n			precision mediump float;\n			uniform sampler2D texture;\n			varying vec2 v_texcoord;\n			void main() {\n				gl_FragColor = texture2D(texture, v_texcoord);\n			}\n		");
@@ -239,7 +250,7 @@ function Iota(canvas, input, init_img) {
 		console.log(gl.getShaderInfoLog(fs));
 	}
 	prog = gl.createProgram();
-	gl.attachShader(prog, vs);
+	gl.attachShader(prog, fish_eye ? vs2 : vs);
 	gl.attachShader(prog, fs);
 	gl.linkProgram(prog);
 	if (! (!! gl.getProgramParameter(prog, gl.LINK_STATUS))) {
@@ -265,7 +276,8 @@ function Iota(canvas, input, init_img) {
 		hr = Math.max(1, w / h);
 		vr = Math.max(1, h / w);
 		gl.uniform1i(gl.getUniformLocation(prog, 'texture'), 0);
-		gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'projectionMatrix'), false, M44$frustum$NNNNNN(- 0.1 * hr, 0.1 * hr, - 0.1 * vr, 0.1 * vr, near, 1.1).mul$LM44$(M44$rotationX$N(- view_p)).mul$LM44$(M44$rotationY$N(- view_h)).mul$LM44$(M44$rotationX$N(z_y)).mul$LM44$(M44$rotationZ$N(- z_x)).array$());
+		gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'projectionMatrix'), false, fish_eye ? M44$ortho$NNNNNN(- hr, hr, - vr, vr, near, near + 2).array$() : M44$frustum$NNNNNN(- 0.1 * hr, 0.1 * hr, - 0.1 * vr, 0.1 * vr, near, 1.1).array$());
+		gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'modelviewMatrix'), false, M44$rotationX$N(- view_p).mul$LM44$(M44$rotationY$N(- view_h)).mul$LM44$(M44$rotationX$N(z_y)).mul$LM44$(M44$rotationZ$N(- z_x)).array$());
 		gl.viewport(0, 0, w, h);
 		gl.clearColor(0.1, 0.2, 0.3, 1);
 		gl.clear(gl.COLOR_BUFFER_BIT);
@@ -454,14 +466,63 @@ function Iota(canvas, input, init_img) {
 			left_last_y = mev.clientY;
 		}
 	});
+	full_screen = false;
+	full_added = false;
+	full_w = 0;
+	full_h = 0;
 	canvas.ondblclick = (function (ev) {
 		var c;
+		var fsh;
+		var fullscreen_func;
 		c = canvas;
+		fsh = canvas;
 		if (c.mozRequestFullScreen) {
-			canvas.mozRequestFullScreen();
+			function fullscreen_func(ev) {
+				var fse;
+				if (full_screen) {
+					canvas.width = full_w;
+					canvas.height = full_h;
+					full_screen = false;
+				} else {
+					fse = dom.document.mozFullScreenElement;
+					if (fse == canvas) {
+						canvas.width = dom.window.innerWidth;
+						canvas.height = dom.window.innerHeight;
+						full_screen = true;
+					}
+				}
+				draw();
+			}
+			if (! full_added) {
+				dom.document.addEventListener('mozfullscreenchange', fullscreen_func);
+				full_added = true;
+			}
+			if (! full_screen) {
+				full_w = canvas.width;
+				full_h = canvas.height;
+				fsh.mozRequestFullScreen();
+			}
 		}
 		if (c.webkitRequestFullScreen) {
-			canvas.webkitRequestFullScreen();
+			if (! full_screen) {
+				fsh.onwebkitfullscreenchange = (function (ev) {
+					var w;
+					var h;
+					full_screen = true;
+					w = canvas.width;
+					h = canvas.height;
+					canvas.width = dom.window.innerWidth;
+					canvas.height = dom.window.innerHeight;
+					draw();
+					fsh.onwebkitfullscreenchange = (function (ev) {
+						full_screen = false;
+						canvas.width = w;
+						canvas.height = h;
+						draw();
+					});
+				});
+				fsh.webkitRequestFullScreen();
+			}
 		}
 	});
 	dom.window.addEventListener('keydown', (function (ev) {
@@ -491,12 +552,17 @@ function Iota(canvas, input, init_img) {
 	}));
 };
 
-function Iota$0(canvas, input) {
+function Iota$0(canvas, input, init_img) {
 	var $this = this;
-	Iota.call(this, canvas, input, null);
+	Iota.call(this, canvas, input, init_img, false);
 };
 
-$__jsx_extend([Iota, Iota$0], Object);
+function Iota$1(canvas, input) {
+	var $this = this;
+	Iota.call(this, canvas, input, null, false);
+};
+
+$__jsx_extend([Iota, Iota$0, Iota$1], Object);
 function dom() {}
 $__jsx_extend([dom], Object);
 function dom$id$S(id) {
@@ -3955,8 +4021,9 @@ var $__jsx_classMap = {
 		_Main: _Main,
 		_Main$: _Main,
 		Iota: Iota,
-		Iota$LHTMLCanvasElement$LHTMLInputElement$LHTMLImageElement$: Iota,
-		Iota$LHTMLCanvasElement$LHTMLInputElement$: Iota$0
+		Iota$LHTMLCanvasElement$LHTMLInputElement$LHTMLImageElement$B: Iota,
+		Iota$LHTMLCanvasElement$LHTMLInputElement$LHTMLImageElement$: Iota$0,
+		Iota$LHTMLCanvasElement$LHTMLInputElement$: Iota$1
 	},
 	"system:lib/js/js/web.jsx": {
 		dom: dom,
