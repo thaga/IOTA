@@ -5,6 +5,13 @@
 左上のボタンでTHETA画像選択(複数選択可)あるいはドラッグ＆ドロップ(複数ドロップ可)すると
 ビューアとして使えます。
 
+自分のwebページでTHETA画像を公開する例はこちら→ http://thaga.github.io/IOTA/multi-sample.html
+
+iota.jsx.jsは、ページ内に"iota-canvas"というidのcanvas要素があるかどうかで動作が変わります。
+存在する場合はブラウザ画面の中で一杯に広がってビューアになります。
+"iota-canvas"が存在しない場合は、ページ内に存在しdata-theta-img属性を持つcanvas要素を探し出し、
+それぞれにTHETA画像を表示します。
+
 
 
 【自分のwebページにIOTAを組み込む】
@@ -25,9 +32,6 @@
 　を置く。
 　
 　THETA画像のURLを、data-theta-img属性で指定してください。
-
-IOTAのスクリプトは、ページ内に存在しdata-theta-img属性を持つcanvas要素を探し出し、
-それぞれにTHETA画像を表示します。
 
 
 
