@@ -11,25 +11,47 @@ import 'mvq.jsx';
 
 class _Main {
 	static function main(args:string[]) : void {
+		// IOTA用のcanvasがある場合
 		var canvas = dom.id('iota_canvas') as HTMLCanvasElement;
-		canvas.style.position = 'absolute';
-		canvas.style.left = '0px';
-		canvas.style.top = '0px';
-		var input = dom.id('files_input') as HTMLInputElement; 
-
-		new Iota(canvas, input);
-		
-		canvas.width = dom.window.innerWidth;
-		canvas.height = dom.window.innerHeight;
-		dom.window.onresize = function(ev:Event):void {
+		if (canvas) {
+			canvas.style.position = 'absolute';
+			canvas.style.left = '0px';
+			canvas.style.top = '0px';
+			var input = dom.id('iota_input') as HTMLInputElement; 
+			
+			var iota = new Iota(canvas, input);
+			
 			canvas.width = dom.window.innerWidth;
 			canvas.height = dom.window.innerHeight;
-		};
+			// ブラウザのリサイズ対応
+			dom.window.onresize = function(ev:Event):void {
+				canvas.width = dom.window.innerWidth;
+				canvas.height = dom.window.innerHeight;
+				iota.draw(); // 再描画
+			};
+		}
+		
+		// data-theta-img属性を持つcanvasがある場合
+		var all_canvas = dom.window.document.getElementsByTagName('canvas');
+		for (var i = 0; i < all_canvas.length; ++i) {
+			var elem = all_canvas[i] as HTMLElement;
+			var theta_url = elem.dataset['thetaImg'];
+			if (theta_url) {
+				(function(canvas:HTMLCanvasElement, url:string):void{
+					var img = dom.window.document.createElement('img') as HTMLImageElement;
+					img.onload = function(ev:Event):void {
+						new Iota(canvas, null, img);
+					};
+					img.src = url;
+				})(elem as HTMLCanvasElement, theta_url);
+			}
+		}
 	}
 }
 
 class Iota {
-	function constructor(canvas:HTMLCanvasElement, input:HTMLInputElement) {
+	var draw = null:function():void;
+	function constructor(canvas:HTMLCanvasElement, input:HTMLInputElement, init_img:HTMLImageElement = null) {
 		// 全球の分割数 横・縦
 		var hdiv = 128;
 		var vdiv = 64;
@@ -154,6 +176,8 @@ class Iota {
 			
 			gl.drawElements(gl.TRIANGLE_STRIP, lattice_index_array.length, gl.UNSIGNED_SHORT, 0);
 		}
+		this.draw = draw;
+		
 		
 		// テクスチャを切り替える
 		function setImage(img:HTMLImageElement) : void {
@@ -182,6 +206,8 @@ class Iota {
 		
 		
 		
+		
+		if (init_img) setImage(init_img);
 		
 		var files = null:FileList;
 		var file_index = -1;
@@ -263,10 +289,6 @@ class Iota {
 		}
 		
 		
-		// ブラウザのリサイズ対応
-		dom.window.addEventListener('resize', function(ev:Event):void {
-			draw();
-		});
 		// Chrome向けホイールイベント登録
 		canvas.onmousewheel = function(ev:Event):void {
 			var wev = ev as __noconvert__ Map.<variant>;
@@ -302,8 +324,9 @@ class Iota {
 		canvas.onmousemove = function(ev:Event):void {
 			var mev = ev as MouseEvent;
 			if (left_down) {
-				view_h += (mev.clientX - left_last_x) * 0.0003 / near;
-				view_p += (mev.clientY - left_last_y) * 0.0003 / near;
+				var k = 1 / Math.sqrt(canvas.width * canvas.height * near);
+				view_h += (mev.clientX - left_last_x) * k;
+				view_p += (mev.clientY - left_last_y) * k;
 				if (view_p > 3.14159265/2) view_p = 3.14159265/2;
 				if (view_p < -3.14159265/2) view_p = -3.14159265/2;
 				draw();

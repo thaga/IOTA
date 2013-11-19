@@ -115,24 +115,47 @@ $__jsx_extend([_Main], Object);
 function _Main$main$AS(args) {
 	var canvas;
 	var input;
+	var iota;
+	var all_canvas;
+	var i;
+	var elem;
+	var theta_url;
 	canvas = dom$id$S('iota_canvas');
-	canvas.style.position = 'absolute';
-	canvas.style.left = '0px';
-	canvas.style.top = '0px';
-	input = dom$id$S('files_input');
-	new Iota(canvas, input);
-	canvas.width = dom.window.innerWidth;
-	canvas.height = dom.window.innerHeight;
-	dom.window.onresize = (function (ev) {
+	if (canvas) {
+		canvas.style.position = 'absolute';
+		canvas.style.left = '0px';
+		canvas.style.top = '0px';
+		input = dom$id$S('iota_input');
+		iota = new Iota$0(canvas, input);
 		canvas.width = dom.window.innerWidth;
 		canvas.height = dom.window.innerHeight;
-	});
+		dom.window.onresize = (function (ev) {
+			canvas.width = dom.window.innerWidth;
+			canvas.height = dom.window.innerHeight;
+			iota.draw();
+		});
+	}
+	all_canvas = dom.window.document.getElementsByTagName('canvas');
+	for (i = 0; i < all_canvas.length; ++ i) {
+		elem = all_canvas[i];
+		theta_url = elem.dataset.thetaImg;
+		if (theta_url) {
+			(function (canvas, url) {
+				var img;
+				img = dom.window.document.createElement('img');
+				img.onload = (function (ev) {
+					new Iota(canvas, null, img);
+				});
+				img.src = url;
+			})(elem, theta_url);
+		}
+	}
 };
 
 _Main.main = _Main$main$AS;
 _Main.main$AS = _Main$main$AS;
 
-function Iota(canvas, input) {
+function Iota(canvas, input, init_img) {
 	var $this = this;
 	var hdiv;
 	var vdiv;
@@ -160,6 +183,7 @@ function Iota(canvas, input) {
 	var left_down;
 	var left_last_x;
 	var left_last_y;
+	this.draw = null;
 	hdiv = 128;
 	vdiv = 64;
 	function create_lattice(hdiv, vdiv) {
@@ -247,6 +271,7 @@ function Iota(canvas, input) {
 		gl.clear(gl.COLOR_BUFFER_BIT);
 		gl.drawElements(gl.TRIANGLE_STRIP, lattice_index_array.length, gl.UNSIGNED_SHORT, 0);
 	}
+	this.draw = draw;
 	function setImage(img) {
 		if (! texture) {
 			texture = gl.createTexture();
@@ -271,6 +296,9 @@ function Iota(canvas, input) {
 			near = 0.01;
 		}
 		draw();
+	}
+	if (init_img) {
+		setImage(init_img);
 	}
 	files = null;
 	file_index = - 1;
@@ -370,9 +398,6 @@ function Iota(canvas, input) {
 			setFile(((file_index = 0) | 0));
 		});
 	}
-	dom.window.addEventListener('resize', (function (ev) {
-		draw();
-	}));
 	canvas.onmousewheel = (function (ev) {
 		var wev;
 		wev = ev;
@@ -409,10 +434,12 @@ function Iota(canvas, input) {
 	});
 	canvas.onmousemove = (function (ev) {
 		var mev;
+		var k;
 		mev = ev;
 		if (left_down) {
-			view_h += (mev.clientX - left_last_x) * 0.0003 / near;
-			view_p += (mev.clientY - left_last_y) * 0.0003 / near;
+			k = 1 / Math.sqrt(canvas.width * canvas.height * near);
+			view_h += (mev.clientX - left_last_x) * k;
+			view_p += (mev.clientY - left_last_y) * k;
 			if (view_p > 3.14159265 / 2) {
 				view_p = 3.14159265 / 2;
 			}
@@ -450,7 +477,12 @@ function Iota(canvas, input) {
 	});
 };
 
-$__jsx_extend([Iota], Object);
+function Iota$0(canvas, input) {
+	var $this = this;
+	Iota.call(this, canvas, input, null);
+};
+
+$__jsx_extend([Iota, Iota$0], Object);
 function dom() {}
 $__jsx_extend([dom], Object);
 function dom$id$S(id) {
@@ -3909,7 +3941,8 @@ var $__jsx_classMap = {
 		_Main: _Main,
 		_Main$: _Main,
 		Iota: Iota,
-		Iota$LHTMLCanvasElement$LHTMLInputElement$: Iota
+		Iota$LHTMLCanvasElement$LHTMLInputElement$LHTMLImageElement$: Iota,
+		Iota$LHTMLCanvasElement$LHTMLInputElement$: Iota$0
 	},
 	"system:lib/js/js/web.jsx": {
 		dom: dom,
