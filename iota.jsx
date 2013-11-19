@@ -1,8 +1,3 @@
-// JSXによるコンパイルは、
-//  > jsx --disable-type-check --executable web --output iota.jsx.js iota.jsx
-//
-// --disable-type-checkが必要です。
-
 import 'js/web.jsx';
 import 'console.jsx';
 import 'Timer.jsx';
@@ -292,11 +287,13 @@ class Iota {
 		
 		// Chrome向けホイールイベント登録
 		canvas.onmousewheel = function(ev:Event):void {
+			ev.preventDefault();
 			var wev = ev as __noconvert__ Map.<variant>;
 			onWheel(wev['wheelDelta'] as number / -120);
 		};
 		// Firefox向けホイールイベント登録
 		canvas.addEventListener('DOMMouseScroll', function(ev:Event):void {
+			ev.preventDefault();
 			var uev = ev as UIEvent;
 			onWheel(uev.detail / 3);
 		}, false);
@@ -306,23 +303,24 @@ class Iota {
 		var left_last_x = 0;
 		var left_last_y = 0;
 		canvas.onmousedown = function(ev:Event):void {
+			ev.preventDefault();
 			var mev = ev as MouseEvent;
 			if (mev.button == 0) {
 				left_down = true;
 				left_last_x = mev.clientX;
 				left_last_y = mev.clientY;
 			}
-			ev.preventDefault();
 		};
 		canvas.onmouseup = function(ev:Event):void {
+			ev.preventDefault();
 			var mev = ev as MouseEvent;
 			if (mev.button == 0) left_down = false;
-			ev.preventDefault();
 		};
 		canvas.onmouseout = function(ev:Event):void {
 			left_down = false;
 		};
 		canvas.onmousemove = function(ev:Event):void {
+			ev.preventDefault();
 			var mev = ev as MouseEvent;
 			if (left_down) {
 				var k = 1 / Math.sqrt(canvas.width * canvas.height * near);
@@ -334,7 +332,6 @@ class Iota {
 				left_last_x = mev.clientX;
 				left_last_y = mev.clientY;
 			}
-			ev.preventDefault();
 		};
 		
 		// キー操作
