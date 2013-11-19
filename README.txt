@@ -14,8 +14,8 @@
 　　<script src="http://thaga.github.io/IOTA/iota.jsx.js"></script>
 　を置く。
 　
-　github上のjsはいつどう変化するか分からないので、手元に置いておいて、src="..."の部分も
-　変更しておく事をオススメ致します。
+　github上のiota.jsx.jsはいつどう変化するか分からないので、自分の手元にコピーしておいて、
+　src="..."の部分もそちらを参照するよう変更しておく事をオススメ致します。
 
 2. THETA画像を見るためのcanvas要素を追加
 　THETAの画像を置きたい場所に、
