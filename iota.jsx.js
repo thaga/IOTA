@@ -123,7 +123,7 @@ function _Main$main$AS(args) {
 	canvas = (function ($v) {
 		if (! ($v == null || $v instanceof HTMLCanvasElement)) {
 			debugger;
-			throw new Error("[iota.jsx:15:43] detected invalid cast, value is not an instance of the designated type or null\n        var canvas = dom.id(\'iota_canvas\') as HTMLCanvasElement;\r\n                                           ^^\n");
+			throw new Error("[iota.jsx:10:43] detected invalid cast, value is not an instance of the designated type or null\n        var canvas = dom.id(\'iota_canvas\') as HTMLCanvasElement;\r\n                                           ^^\n");
 		}
 		return $v;
 	}(dom$id$S('iota_canvas')));
@@ -134,7 +134,7 @@ function _Main$main$AS(args) {
 		input = (function ($v) {
 			if (! ($v == null || $v instanceof HTMLInputElement)) {
 				debugger;
-				throw new Error("[iota.jsx:20:45] detected invalid cast, value is not an instance of the designated type or null\n            var input = dom.id(\'iota_input\') as HTMLInputElement; \r\n                                             ^^\n");
+				throw new Error("[iota.jsx:15:45] detected invalid cast, value is not an instance of the designated type or null\n            var input = dom.id(\'iota_input\') as HTMLInputElement; \r\n                                             ^^\n");
 			}
 			return $v;
 		}(dom$id$S('iota_input')));
@@ -152,7 +152,7 @@ function _Main$main$AS(args) {
 		elem = (function ($v) {
 			if (! ($v == null || $v instanceof HTMLElement)) {
 				debugger;
-				throw new Error("[iota.jsx:37:37] detected invalid cast, value is not an instance of the designated type or null\n            var elem = all_canvas[i] as HTMLElement;\r\n                                     ^^\n");
+				throw new Error("[iota.jsx:32:37] detected invalid cast, value is not an instance of the designated type or null\n            var elem = all_canvas[i] as HTMLElement;\r\n                                     ^^\n");
 			}
 			return $v;
 		}(all_canvas[i]));
@@ -163,7 +163,7 @@ function _Main$main$AS(args) {
 				img = (function ($v) {
 					if (! ($v == null || $v instanceof HTMLImageElement)) {
 						debugger;
-						throw new Error("[iota.jsx:41:71] detected invalid cast, value is not an instance of the designated type or null\n                    var img = dom.window.document.createElement(\'img\') as HTMLImageElement;\r\n                                                                       ^^\n");
+						throw new Error("[iota.jsx:36:71] detected invalid cast, value is not an instance of the designated type or null\n                    var img = dom.window.document.createElement(\'img\') as HTMLImageElement;\r\n                                                                       ^^\n");
 					}
 					return $v;
 				}(dom.window.document.createElement('img')));
@@ -174,13 +174,13 @@ function _Main$main$AS(args) {
 			})((function ($v) {
 				if (! ($v == null || $v instanceof HTMLCanvasElement)) {
 					debugger;
-					throw new Error("[iota.jsx:46:24] detected invalid cast, value is not an instance of the designated type or null\n                })(elem as HTMLCanvasElement, theta_url);\r\n                        ^^\n");
+					throw new Error("[iota.jsx:41:24] detected invalid cast, value is not an instance of the designated type or null\n                })(elem as HTMLCanvasElement, theta_url);\r\n                        ^^\n");
 				}
 				return $v;
 			}(elem)), (function (v) {
 				if (! (v != null)) {
 					debugger;
-					throw new Error("[iota.jsx:46:46] null access\n                })(elem as HTMLCanvasElement, theta_url);\r\n                                              ^^^^^^^^^\n");
+					throw new Error("[iota.jsx:41:46] null access\n                })(elem as HTMLCanvasElement, theta_url);\r\n                                              ^^^^^^^^^\n");
 				}
 				return v;
 			}(theta_url)));
@@ -255,7 +255,7 @@ function Iota(canvas, input, init_img) {
 	gl = (function ($v) {
 		if (! ($v == null || $v instanceof WebGLRenderingContext)) {
 			debugger;
-			throw new Error("[iota.jsx:84:86] detected invalid cast, value is not an instance of the designated type or null\n        var gl = canvas.getContext(\'experimental-webgl\', {premultipliedAlpha: false}) as WebGLRenderingContext;\r\n                                                                                      ^^\n");
+			throw new Error("[iota.jsx:79:86] detected invalid cast, value is not an instance of the designated type or null\n        var gl = canvas.getContext(\'experimental-webgl\', {premultipliedAlpha: false}) as WebGLRenderingContext;\r\n                                                                                      ^^\n");
 		}
 		return $v;
 	}(canvas.getContext('experimental-webgl', ({ premultipliedAlpha: false }))));
@@ -361,7 +361,7 @@ function Iota(canvas, input, init_img) {
 			img = (function ($v) {
 				if (! ($v == null || $v instanceof HTMLImageElement)) {
 					debugger;
-					throw new Error("[iota.jsx:226:60] detected invalid cast, value is not an instance of the designated type or null\n                var img = dom.document.createElement(\'img\') as HTMLImageElement;\r\n                                                            ^^\n");
+					throw new Error("[iota.jsx:221:60] detected invalid cast, value is not an instance of the designated type or null\n                var img = dom.document.createElement(\'img\') as HTMLImageElement;\r\n                                                            ^^\n");
 				}
 				return $v;
 			}(dom.document.createElement('img')));
@@ -373,13 +373,13 @@ function Iota(canvas, input, init_img) {
 			img.src = (function ($v) {
 				if (! (typeof $v === "string")) {
 					debugger;
-					throw new Error("[iota.jsx:233:58] detected invalid cast, value is not a string\n                img.src = (e.target as FileReader).result as __noconvert__ string;\r\n                                                          ^^\n");
+					throw new Error("[iota.jsx:228:58] detected invalid cast, value is not a string\n                img.src = (e.target as FileReader).result as __noconvert__ string;\r\n                                                          ^^\n");
 				}
 				return $v;
 			}((function ($v) {
 				if (! ($v == null || $v instanceof FileReader)) {
 					debugger;
-					throw new Error("[iota.jsx:233:36] detected invalid cast, value is not an instance of the designated type or null\n                img.src = (e.target as FileReader).result as __noconvert__ string;\r\n                                    ^^\n");
+					throw new Error("[iota.jsx:228:36] detected invalid cast, value is not an instance of the designated type or null\n                img.src = (e.target as FileReader).result as __noconvert__ string;\r\n                                    ^^\n");
 				}
 				return $v;
 			}(e.target)).result));
@@ -427,25 +427,25 @@ function Iota(canvas, input, init_img) {
 				return (function (v) {
 					if (! (v != null)) {
 						debugger;
-						throw new Error("[iota.jsx:255:71] null access\n                function readInt32(b:Uint8Array, p:int) : int {return b[p]<<24 | b[p+1]<<16 | b[p+2]<<8 | b[p+3];} \r\n                                                                       ^\n");
+						throw new Error("[iota.jsx:250:71] null access\n                function readInt32(b:Uint8Array, p:int) : int {return b[p]<<24 | b[p+1]<<16 | b[p+2]<<8 | b[p+3];} \r\n                                                                       ^\n");
 					}
 					return v;
 				}(b[p])) << 24 | (function (v) {
 					if (! (v != null)) {
 						debugger;
-						throw new Error("[iota.jsx:255:82] null access\n                function readInt32(b:Uint8Array, p:int) : int {return b[p]<<24 | b[p+1]<<16 | b[p+2]<<8 | b[p+3];} \r\n                                                                                  ^\n");
+						throw new Error("[iota.jsx:250:82] null access\n                function readInt32(b:Uint8Array, p:int) : int {return b[p]<<24 | b[p+1]<<16 | b[p+2]<<8 | b[p+3];} \r\n                                                                                  ^\n");
 					}
 					return v;
 				}(b[p + 1])) << 16 | (function (v) {
 					if (! (v != null)) {
 						debugger;
-						throw new Error("[iota.jsx:255:95] null access\n                function readInt32(b:Uint8Array, p:int) : int {return b[p]<<24 | b[p+1]<<16 | b[p+2]<<8 | b[p+3];} \r\n                                                                                               ^\n");
+						throw new Error("[iota.jsx:250:95] null access\n                function readInt32(b:Uint8Array, p:int) : int {return b[p]<<24 | b[p+1]<<16 | b[p+2]<<8 | b[p+3];} \r\n                                                                                               ^\n");
 					}
 					return v;
 				}(b[p + 2])) << 8 | (function (v) {
 					if (! (v != null)) {
 						debugger;
-						throw new Error("[iota.jsx:255:107] null access\n                function readInt32(b:Uint8Array, p:int) : int {return b[p]<<24 | b[p+1]<<16 | b[p+2]<<8 | b[p+3];} \r\n                                                                                                           ^\n");
+						throw new Error("[iota.jsx:250:107] null access\n                function readInt32(b:Uint8Array, p:int) : int {return b[p]<<24 | b[p+1]<<16 | b[p+2]<<8 | b[p+3];} \r\n                                                                                                           ^\n");
 					}
 					return v;
 				}(b[p + 3]));
@@ -481,7 +481,7 @@ function Iota(canvas, input, init_img) {
 		de = (function ($v) {
 			if (! ($v == null || $v instanceof DragEvent)) {
 				debugger;
-				throw new Error("[iota.jsx:286:23] detected invalid cast, value is not an instance of the designated type or null\n            var de = e as __noconvert__ DragEvent; // CAUTION: Chrome creates MouseEvent\r\n                       ^^\n");
+				throw new Error("[iota.jsx:281:23] detected invalid cast, value is not an instance of the designated type or null\n            var de = e as __noconvert__ DragEvent; // CAUTION: Chrome creates MouseEvent\r\n                       ^^\n");
 			}
 			return $v;
 		}(e));
@@ -490,10 +490,11 @@ function Iota(canvas, input, init_img) {
 	});
 	canvas.onmousewheel = (function (ev) {
 		var wev;
+		ev.preventDefault();
 		wev = (function ($v) {
 			if (! ($v == null || typeof $v === "object")) {
 				debugger;
-				throw new Error("[iota.jsx:295:25] detected invalid cast, value is not a Map or null\n            var wev = ev as __noconvert__ Map.<variant>;\r\n                         ^^\n");
+				throw new Error("[iota.jsx:291:25] detected invalid cast, value is not a Map or null\n            var wev = ev as __noconvert__ Map.<variant>;\r\n                         ^^\n");
 			}
 			return $v;
 		}(ev));
@@ -501,10 +502,11 @@ function Iota(canvas, input, init_img) {
 	});
 	canvas.addEventListener('DOMMouseScroll', (function (ev) {
 		var uev;
+		ev.preventDefault();
 		uev = (function ($v) {
 			if (! ($v == null || $v instanceof UIEvent)) {
 				debugger;
-				throw new Error("[iota.jsx:300:25] detected invalid cast, value is not an instance of the designated type or null\n            var uev = ev as UIEvent;\r\n                         ^^\n");
+				throw new Error("[iota.jsx:297:25] detected invalid cast, value is not an instance of the designated type or null\n            var uev = ev as UIEvent;\r\n                         ^^\n");
 			}
 			return $v;
 		}(ev));
@@ -515,10 +517,11 @@ function Iota(canvas, input, init_img) {
 	left_last_y = 0;
 	canvas.onmousedown = (function (ev) {
 		var mev;
+		ev.preventDefault();
 		mev = (function ($v) {
 			if (! ($v == null || $v instanceof MouseEvent)) {
 				debugger;
-				throw new Error("[iota.jsx:309:25] detected invalid cast, value is not an instance of the designated type or null\n            var mev = ev as MouseEvent;\r\n                         ^^\n");
+				throw new Error("[iota.jsx:307:25] detected invalid cast, value is not an instance of the designated type or null\n            var mev = ev as MouseEvent;\r\n                         ^^\n");
 			}
 			return $v;
 		}(ev));
@@ -527,21 +530,20 @@ function Iota(canvas, input, init_img) {
 			left_last_x = mev.clientX;
 			left_last_y = mev.clientY;
 		}
-		ev.preventDefault();
 	});
 	canvas.onmouseup = (function (ev) {
 		var mev;
+		ev.preventDefault();
 		mev = (function ($v) {
 			if (! ($v == null || $v instanceof MouseEvent)) {
 				debugger;
-				throw new Error("[iota.jsx:318:25] detected invalid cast, value is not an instance of the designated type or null\n            var mev = ev as MouseEvent;\r\n                         ^^\n");
+				throw new Error("[iota.jsx:316:25] detected invalid cast, value is not an instance of the designated type or null\n            var mev = ev as MouseEvent;\r\n                         ^^\n");
 			}
 			return $v;
 		}(ev));
 		if (mev.button === 0) {
 			left_down = false;
 		}
-		ev.preventDefault();
 	});
 	canvas.onmouseout = (function (ev) {
 		left_down = false;
@@ -549,10 +551,11 @@ function Iota(canvas, input, init_img) {
 	canvas.onmousemove = (function (ev) {
 		var mev;
 		var k;
+		ev.preventDefault();
 		mev = (function ($v) {
 			if (! ($v == null || $v instanceof MouseEvent)) {
 				debugger;
-				throw new Error("[iota.jsx:326:25] detected invalid cast, value is not an instance of the designated type or null\n            var mev = ev as MouseEvent;\r\n                         ^^\n");
+				throw new Error("[iota.jsx:324:25] detected invalid cast, value is not an instance of the designated type or null\n            var mev = ev as MouseEvent;\r\n                         ^^\n");
 			}
 			return $v;
 		}(ev));
@@ -570,7 +573,6 @@ function Iota(canvas, input, init_img) {
 			left_last_x = mev.clientX;
 			left_last_y = mev.clientY;
 		}
-		ev.preventDefault();
 	});
 	dom.window.addEventListener('keydown', (function (ev) {
 		var kev;
@@ -580,7 +582,7 @@ function Iota(canvas, input, init_img) {
 		kev = (function ($v) {
 			if (! ($v == null || $v instanceof KeyboardEvent)) {
 				debugger;
-				throw new Error("[iota.jsx:344:25] detected invalid cast, value is not an instance of the designated type or null\n            var kev = ev as KeyboardEvent;\r\n                         ^^\n");
+				throw new Error("[iota.jsx:341:25] detected invalid cast, value is not an instance of the designated type or null\n            var kev = ev as KeyboardEvent;\r\n                         ^^\n");
 			}
 			return $v;
 		}(ev));
