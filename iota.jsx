@@ -44,6 +44,11 @@ class _Main {
 	}
 }
 
+native final class FullScreenHandler {
+	function mozRequestFullScreen():void;
+	function webkitRequestFullScreen():void;
+}
+
 class Iota {
 	var draw = null:function():void;
 	function constructor(canvas:HTMLCanvasElement, input:HTMLInputElement, init_img:HTMLImageElement = null) {
@@ -201,7 +206,6 @@ class Iota {
 		
 		
 		
-		
 		if (init_img) setImage(init_img);
 		
 		var files = null:FileList;
@@ -332,6 +336,13 @@ class Iota {
 				left_last_x = mev.clientX;
 				left_last_y = mev.clientY;
 			}
+		};
+		
+		// ダブルクリックでフルスクリーン
+		canvas.ondblclick = function(ev:Event):void {
+			var c = canvas as variant as Map.<variant>;
+			if (c['mozRequestFullScreen']) (canvas as variant as FullScreenHandler).mozRequestFullScreen();
+			if (c['webkitRequestFullScreen']) (canvas as variant as FullScreenHandler).webkitRequestFullScreen();
 		};
 		
 		// キー操作

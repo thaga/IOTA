@@ -14,6 +14,8 @@ iota.jsx.jsは、ページ内に"iota-canvas"というidのcanvas要素がある
 "iota-canvas"が存在しない場合は、ページ内に存在しdata-theta-img属性を持つcanvas要素を探し出し、
 それぞれにTHETA画像を表示します。
 
+どちらのモードでも、ダブルクリックすると全画面モードになります。
+
 
 
 【自分のwebページにIOTAを組み込む】
