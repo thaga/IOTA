@@ -23,6 +23,7 @@
 　THETAの画像を置きたい場所に、
 　　<canvas data-theta-img="??????.jpg" width="384" height="256"></canvas>
 　を置く。
+　
 　THETA画像のURLを、data-theta-img属性で指定してください。
 
 IOTAのスクリプトは、ページ内に存在しdata-theta-img属性を持つcanvas要素を探し出し、
@@ -43,6 +44,7 @@ JSXをインストール後、
 
 
 【ライセンス？】
+
 このディレクトリ内のソースは全てNYSL( http://www.kmonos.net/nysl/ )です。
 煮るなり焼くなり好きにしてください。
 
