@@ -24,7 +24,7 @@
 
 
 【ライセンス？】
-このディレクトリ内のソースは全てNYSL(http://www.kmonos.net/nysl/)です。
+このディレクトリ内のソースは全てNYSL( http://www.kmonos.net/nysl/ )です。
 煮るなり焼くなり好きにしてください。
 
 
