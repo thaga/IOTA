@@ -144,7 +144,7 @@ function _Main$main$AS(args) {
 				var img;
 				img = dom.window.document.createElement('img');
 				img.onload = (function (ev) {
-					new Iota$0(canvas, null, img);
+					new Iota(canvas, null, img, canvas.dataset.iotaFisheye != null);
 				});
 				img.src = url;
 			})(elem, theta_url);
@@ -166,9 +166,10 @@ function Iota(canvas, input, init_img, fish_eye) {
 	var lattice_index_buf;
 	var lattice_index_array;
 	var vs;
-	var vs2;
+	var vs_f;
 	var fs;
 	var prog;
+	var prog_f;
 	var texture;
 	var near;
 	var view_h;
@@ -237,11 +238,11 @@ function Iota(canvas, input, init_img, fish_eye) {
 	if (! (!! gl.getShaderParameter(vs, gl.COMPILE_STATUS))) {
 		console.log(gl.getShaderInfoLog(vs));
 	}
-	vs2 = gl.createShader(gl.VERTEX_SHADER);
-	gl.shaderSource(vs2, "\n			precision mediump float;\n			uniform mat4 projectionMatrix;\n			uniform mat4 modelviewMatrix;\n			attribute vec2 position;\n			varying vec2 v_texcoord;\n			void main() {\n				v_texcoord = position;\n				float n = -projectionMatrix[3][2] - 1.0;\n				float h = (position.x + 0.25) * 3.14159265 * 2.0;\n				float v = (position.y - 0.5) * 3.14159265;\n				float hc = cos(h), hs = sin(h);\n				float vc = cos(v), vs = sin(v);\n				vec3 p = (modelviewMatrix * vec4(vc * hc, vs, vc * hs, 1.0)).xyz;\n//				float theta = atan(p.y, p.x);\n//				float n = -projectionMatrix[3][2] - 1.0;\n//				float r = acos(-p.z) * n * 5.0;\n//				gl_Position = projectionMatrix * vec4(r * cos(theta), r * sin(theta), p.z - n - 0.9, 1.0);\n				float xy2 = dot(p.xy, p.xy);\n				float d = dot(p, p);\n				gl_Position = projectionMatrix * vec4(p.x * (d + p.z) / xy2, p.y * (d + p.z) / xy2, p.z - n - 0.9, 1.0);\n			}\n		");
-	gl.compileShader(vs2);
-	if (! (!! gl.getShaderParameter(vs2, gl.COMPILE_STATUS))) {
-		console.log(gl.getShaderInfoLog(vs2));
+	vs_f = gl.createShader(gl.VERTEX_SHADER);
+	gl.shaderSource(vs_f, "\n			precision mediump float;\n			uniform mat4 projectionMatrix;\n			uniform mat4 modelviewMatrix;\n			attribute vec2 position;\n			varying vec2 v_texcoord;\n			void main() {\n				v_texcoord = position;\n				float h = (position.x + 0.25) * 3.14159265 * 2.0;\n				float v = (position.y - 0.5) * 3.14159265;\n				float hc = cos(h), hs = sin(h);\n				float vc = cos(v), vs = sin(v);\n				vec3 p = (modelviewMatrix * vec4(vc * hc, vs, vc * hs, 1.0)).xyz;\n				float n = -projectionMatrix[3][2] - 1.0;\n				\n				// 等距離射影\n				float phi = atan(p.y, p.x);\n				float r = 4.0 * sqrt(n) * acos(-p.z);\n				gl_Position = projectionMatrix * vec4(r * cos(phi), r * sin(phi), p.z - n - 0.9, 1.0);\n				\n				// 回転放物面への等距離射影(?) (t-potさんとこのやつ)\n//				float xy2 = dot(p.xy, p.xy);\n//				float d = length(p);\n//				gl_Position = projectionMatrix * vec4(p.x * (d + p.z) / xy2, p.y * (d + p.z) / xy2, p.z -n - 0.9, 1.0);\n			}\n		");
+	gl.compileShader(vs_f);
+	if (! (!! gl.getShaderParameter(vs_f, gl.COMPILE_STATUS))) {
+		console.log(gl.getShaderInfoLog(vs_f));
 	}
 	fs = gl.createShader(gl.FRAGMENT_SHADER);
 	gl.shaderSource(fs, "\n			precision mediump float;\n			uniform sampler2D texture;\n			varying vec2 v_texcoord;\n			void main() {\n				gl_FragColor = texture2D(texture, v_texcoord);\n			}\n		");
@@ -250,13 +251,19 @@ function Iota(canvas, input, init_img, fish_eye) {
 		console.log(gl.getShaderInfoLog(fs));
 	}
 	prog = gl.createProgram();
-	gl.attachShader(prog, fish_eye ? vs2 : vs);
+	gl.attachShader(prog, vs);
 	gl.attachShader(prog, fs);
 	gl.linkProgram(prog);
 	if (! (!! gl.getProgramParameter(prog, gl.LINK_STATUS))) {
 		console.log(gl.getProgramInfoLog(prog));
 	}
-	gl.useProgram(prog);
+	prog_f = gl.createProgram();
+	gl.attachShader(prog_f, vs_f);
+	gl.attachShader(prog_f, fs);
+	gl.linkProgram(prog_f);
+	if (! (!! gl.getProgramParameter(prog_f, gl.LINK_STATUS))) {
+		console.log(gl.getProgramInfoLog(prog_f));
+	}
 	texture = null;
 	near = 0.1;
 	view_h = 0;
@@ -268,6 +275,7 @@ function Iota(canvas, input, init_img, fish_eye) {
 		var h;
 		var hr;
 		var vr;
+		var p;
 		if (! texture) {
 			return;
 		}
@@ -275,9 +283,11 @@ function Iota(canvas, input, init_img, fish_eye) {
 		h = canvas.height;
 		hr = Math.max(1, w / h);
 		vr = Math.max(1, h / w);
-		gl.uniform1i(gl.getUniformLocation(prog, 'texture'), 0);
-		gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'projectionMatrix'), false, fish_eye ? M44$ortho$NNNNNN(- hr, hr, - vr, vr, near, near + 2).array$() : M44$frustum$NNNNNN(- 0.1 * hr, 0.1 * hr, - 0.1 * vr, 0.1 * vr, near, 1.1).array$());
-		gl.uniformMatrix4fv(gl.getUniformLocation(prog, 'modelviewMatrix'), false, M44$rotationX$N(- view_p).mul$LM44$(M44$rotationY$N(- view_h)).mul$LM44$(M44$rotationX$N(z_y)).mul$LM44$(M44$rotationZ$N(- z_x)).array$());
+		p = (fish_eye ? prog_f : prog);
+		gl.useProgram(p);
+		gl.uniform1i(gl.getUniformLocation(p, 'texture'), 0);
+		gl.uniformMatrix4fv(gl.getUniformLocation(p, 'projectionMatrix'), false, fish_eye ? M44$ortho$NNNNNN(- hr, hr, - vr, vr, near, near + 2).array$() : M44$frustum$NNNNNN(- 0.1 * hr, 0.1 * hr, - 0.1 * vr, 0.1 * vr, near, near + 1).array$());
+		gl.uniformMatrix4fv(gl.getUniformLocation(p, 'modelviewMatrix'), false, M44$rotationX$N(- view_p).mul$LM44$(M44$rotationY$N(- view_h)).mul$LM44$(M44$rotationX$N(z_y)).mul$LM44$(M44$rotationZ$N(- z_x)).array$());
 		gl.viewport(0, 0, w, h);
 		gl.clearColor(0.1, 0.2, 0.3, 1);
 		gl.clear(gl.COLOR_BUFFER_BIT);
@@ -527,26 +537,28 @@ function Iota(canvas, input, init_img, fish_eye) {
 	});
 	dom.window.addEventListener('keydown', (function (ev) {
 		var kev;
-		if (! files) {
-			return;
-		}
 		kev = ev;
 		switch (kev.keyCode) {
 		default:
+			console.log('unknown key code: ', kev.keyCode);
 			break;
 		case 37:
-			if (-- file_index >= 0) {
+			if (files && -- file_index >= 0) {
 				setFile((file_index | 0));
 			} else {
 				file_index = 0;
 			}
 			break;
 		case 39:
-			if (++ file_index < files.length) {
+			if (files && ++ file_index < files.length) {
 				setFile((file_index | 0));
 			} else {
 				file_index = files.length - 1;
 			}
+			break;
+		case 70:
+			fish_eye = ! fish_eye;
+			draw();
 			break;
 		}
 	}));
