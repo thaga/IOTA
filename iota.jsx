@@ -35,7 +35,7 @@ class _Main {
 				(function(canvas:HTMLCanvasElement, url:string):void{
 					var img = dom.window.document.createElement('img') as HTMLImageElement;
 					img.onload = function(ev:Event):void {
-						new Iota(canvas, null, img);
+						new Iota(canvas, null, img, canvas.dataset['iotaFisheye'] != null);
 					};
 					img.src = url;
 				})(elem as HTMLCanvasElement, theta_url);
@@ -118,8 +118,8 @@ class Iota {
 		if (!(gl.getShaderParameter(vs, gl.COMPILE_STATUS) as boolean)) console.log(gl.getShaderInfoLog(vs));
 		
 		// 魚眼頂点シェーダを作成
-		var vs2 = gl.createShader(gl.VERTEX_SHADER);
-		gl.shaderSource(vs2, """
+		var vs_f = gl.createShader(gl.VERTEX_SHADER);
+		gl.shaderSource(vs_f, """
 			precision mediump float;
 			uniform mat4 projectionMatrix;
 			uniform mat4 modelviewMatrix;
@@ -127,19 +127,26 @@ class Iota {
 			varying vec2 v_texcoord;
 			void main() {
 				v_texcoord = position;
-				float n = -projectionMatrix[3][2] - 1.0;
 				float h = (position.x + 0.25) * 3.14159265 * 2.0;
 				float v = (position.y - 0.5) * 3.14159265;
 				float hc = cos(h), hs = sin(h);
 				float vc = cos(v), vs = sin(v);
 				vec3 p = (modelviewMatrix * vec4(vc * hc, vs, vc * hs, 1.0)).xyz;
-				float xy2 = dot(p.xy, p.xy);
-				float d = dot(p, p);
-				gl_Position = projectionMatrix * vec4(p.x * (d + p.z) / xy2, p.y * (d + p.z) / xy2, p.z - n - 0.9, 1.0);
+				float n = -projectionMatrix[3][2] - 1.0;
+				
+				// 等距離射影
+				float phi = atan(p.y, p.x);
+				float r = 4.0 * sqrt(n) * acos(-p.z);
+				gl_Position = projectionMatrix * vec4(r * cos(phi), r * sin(phi), p.z - n - 0.9, 1.0);
+				
+				// 回転放物面への等距離射影(?) (t-potさんとこのやつ)
+//				float xy2 = dot(p.xy, p.xy);
+//				float d = length(p);
+//				gl_Position = projectionMatrix * vec4(p.x * (d + p.z) / xy2, p.y * (d + p.z) / xy2, p.z -n - 0.9, 1.0);
 			}
 		""");
-		gl.compileShader(vs2);
-		if (!(gl.getShaderParameter(vs2, gl.COMPILE_STATUS) as boolean)) console.log(gl.getShaderInfoLog(vs2));
+		gl.compileShader(vs_f);
+		if (!(gl.getShaderParameter(vs_f, gl.COMPILE_STATUS) as boolean)) console.log(gl.getShaderInfoLog(vs_f));
 		
 		// フラグメントシェーダを作成
 		var fs = gl.createShader(gl.FRAGMENT_SHADER);
@@ -156,12 +163,18 @@ class Iota {
 		
 		// シェーダプログラムを作成
 		var prog = gl.createProgram();
-		gl.attachShader(prog, fish_eye ? vs2 : vs);
+		gl.attachShader(prog, vs);
 		gl.attachShader(prog, fs);
 		gl.linkProgram(prog);
 		if (!(gl.getProgramParameter(prog, gl.LINK_STATUS) as boolean)) console.log(gl.getProgramInfoLog(prog));
 		
-		gl.useProgram(prog);
+		// 魚眼シェーダプログラムを作成
+		var prog_f = gl.createProgram();
+		gl.attachShader(prog_f, vs_f);
+		gl.attachShader(prog_f, fs);
+		gl.linkProgram(prog_f);
+		if (!(gl.getProgramParameter(prog_f, gl.LINK_STATUS) as boolean)) console.log(gl.getProgramInfoLog(prog_f));
+		
 		
 		
 		// テクスチャ、画角(near)、方位と仰角、THETAの傾き
@@ -181,19 +194,23 @@ class Iota {
 			var hr = Math.max(1, w / h);
 			var vr = Math.max(1, h / w);
 			
+			var p = fish_eye ? prog_f : prog;
+			
+			gl.useProgram(p);
+			
 			gl.uniform1i(
-				gl.getUniformLocation(prog, 'texture'),
+				gl.getUniformLocation(p, 'texture'),
 				0
 			);
 			gl.uniformMatrix4fv(
-				gl.getUniformLocation(prog, 'projectionMatrix'),
+				gl.getUniformLocation(p, 'projectionMatrix'),
 				false,
 				fish_eye
 					? M44.ortho(-hr, hr, -vr, vr, near, near + 2).array()
-				    : M44.frustum(-0.1 * hr, 0.1 * hr, -0.1 * vr, 0.1 * vr, near, 1.1).array()
+				    : M44.frustum(-0.1 * hr, 0.1 * hr, -0.1 * vr, 0.1 * vr, near, near + 1).array()
 			);
 			gl.uniformMatrix4fv(
-				gl.getUniformLocation(prog, 'modelviewMatrix'),
+				gl.getUniformLocation(p, 'modelviewMatrix'),
 				false,
 				M44.rotationX(-view_p)
 				.mul(M44.rotationY(-view_h))
@@ -431,16 +448,20 @@ class Iota {
 		
 		// キー操作
 		dom.window.addEventListener('keydown', function(ev:Event):void {
-			if (!files) return;
-			
 			var kev = ev as KeyboardEvent;
 			switch (kev.keyCode) {
-				default: break;
+				default:
+					console.log('unknown key code: ', kev.keyCode);
+					break;
 				case 37: // ←
-					if (--file_index >= 0) setFile(file_index); else file_index = 0;
+					if (files && --file_index >= 0) setFile(file_index); else file_index = 0;
 					break;
 				case 39: // →
-					if (++file_index < files.length) setFile(file_index); else file_index = files.length - 1;
+					if (files && ++file_index < files.length) setFile(file_index); else file_index = files.length - 1;
+					break;
+				case 70: // F
+					fish_eye = !fish_eye;
+					draw();
 					break;
 			}
 		});
