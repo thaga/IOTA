@@ -299,6 +299,8 @@ function Iota(canvas) {
 	var z_y;
 	var draw;
 	var setImage;
+	var playing_video;
+	var setVideoCurrentFrame;
 	var setVideo;
 	var onWheel;
 	var files;
@@ -465,20 +467,30 @@ function Iota(canvas) {
 		draw();
 	}
 	this.setImage = setImage;
-	function setVideo(video) {
-		var setVideoCurrentFrame;
-		function setVideoCurrentFrame() {
-			gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-			gl.bindTexture(gl.TEXTURE_2D, texture);
-			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-			draw();
+	playing_video = null;
+	function setVideoCurrentFrame() {
+		if (! playing_video.duration || playing_video.currentTime < playing_video.duration) {
+			js$0.global.setTimeout(setVideoCurrentFrame, 66.66666666666667);
+		} else {
+			playing_video = null;
 		}
-		js$0.global.setInterval(setVideoCurrentFrame, 66.66666666666667);
+		gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, playing_video);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		draw();
+	}
+	function setVideo(video) {
+		if (playing_video) {
+			playing_video.pause();
+			playing_video.currentTime = 0;
+		}
+		playing_video = video;
+		js$0.global.setTimeout(setVideoCurrentFrame, 66.66666666666667);
 	}
 	this.setVideo = setVideo;
 	function onWheel(w) {
@@ -495,6 +507,9 @@ function Iota(canvas) {
 	file_index = -1;
 	function setFile(n) {
 		var file;
+		var w;
+		var url;
+		var video;
 		var video_reader;
 		var file_reader;
 		var binary_reader;
@@ -506,15 +521,24 @@ function Iota(canvas) {
 		}
 		file = files[n];
 		if (file.type.substring(0, 5) === 'video') {
-			video_reader = new FileReader();
-			video_reader.onload = (function (e) {
-				var video;
+			w = dom.window;
+			if (w.webkitURL) {
+				url = w.webkitURL;
 				video = dom.document.createElement('video');
-				video.src = e.target.result;
+				video.src = url.createObjectURL(file);
 				video.play();
 				setVideo(video);
-			});
-			video_reader.readAsDataURL(file);
+			} else {
+				video_reader = new FileReader();
+				video_reader.onload = (function (e) {
+					var video;
+					video = dom.document.createElement('video');
+					video.src = e.target.result;
+					video.play();
+					setVideo(video);
+				});
+				video_reader.readAsDataURL(file);
+			}
 		}
 		file_reader = new FileReader();
 		file_reader.onload = (function (e) {
