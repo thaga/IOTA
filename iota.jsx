@@ -77,11 +77,19 @@ class _Main {
 	}
 }
 
+
+
 native final class FullScreenHandler {
 	function mozRequestFullScreen():void;
 	function webkitRequestFullScreen():void;
 	var onwebkitfullscreenchange:Nullable.<function(:Event):void>;
 }
+
+native final class URL_ {
+	function createObjectURL(file:File):string;
+}
+
+
 
 class Iota {
 	var setFishEye = null:function(:boolean):void;
@@ -291,19 +299,31 @@ class Iota {
 		this.setImage = setImage;
 		
 		// 動画を再生する
-		function setVideo(video:HTMLVideoElement) : void {
-			function setVideoCurrentFrame() : void {
-				gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-				gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-				gl.bindTexture(gl.TEXTURE_2D, texture);
-				gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-				draw();
+		var playing_video = null:HTMLVideoElement;
+		function setVideoCurrentFrame() : void {
+			if (!playing_video.duration || playing_video.currentTime < playing_video.duration) {
+				Timer.setTimeout(setVideoCurrentFrame, 1000.0 / 15);
+			} else {
+				playing_video = null;
 			}
-			Timer.setInterval(setVideoCurrentFrame, 1000.0 / 15);
+			gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+			gl.bindTexture(gl.TEXTURE_2D, texture);
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, playing_video);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+			draw();
+			
+		}
+		function setVideo(video:HTMLVideoElement) : void {
+			if (playing_video) {
+				playing_video.pause();
+				playing_video.currentTime = 0;
+			}
+			playing_video = video;
+			Timer.setTimeout(setVideoCurrentFrame, 1000.0 / 15);
 		}
 		this.setVideo = setVideo;
 		
@@ -327,16 +347,26 @@ class Iota {
 			
 			var file = files[n];
 			
+			// 動画の場合
 			if (file.type.substring(0, 5) == 'video') {
-				var video_reader = new FileReader;
-				video_reader.onload = function(e:Event):void {
-					// now file reading complete
+				var w = dom.window as variant as Map.<variant>;
+				if (w['webkitURL']) {
+					var url = w['webkitURL'] as URL_;
 					var video = dom.document.createElement('video') as HTMLVideoElement;
-					video.src = (e.target as FileReader).result as __noconvert__ string;
+					video.src = url.createObjectURL(file);
 					video.play();
 					setVideo(video);
-				};
-				video_reader.readAsDataURL(file);
+				} else {
+					var video_reader = new FileReader;
+					video_reader.onload = function(e:Event):void {
+						// now file reading complete
+						var video = dom.document.createElement('video') as HTMLVideoElement;
+						video.src = (e.target as FileReader).result as __noconvert__ string;
+						video.play();
+						setVideo(video);
+					};
+					video_reader.readAsDataURL(file);
+				}
 			}
 			
 			// テクスチャ用のファイル読み取り
