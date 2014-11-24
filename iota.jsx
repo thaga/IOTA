@@ -12,9 +12,11 @@ class _Main {
 			canvas.style.position = 'absolute';
 			canvas.style.left = '0px';
 			canvas.style.top = '0px';
-			var input = dom.id('iota_input') as HTMLInputElement; 
 			
-			var iota = new Iota(canvas, input);
+			var iota = new Iota(canvas);
+			
+			var input = dom.id('iota_input') as HTMLInputElement; 
+			if (input) iota.setFileInput(input);
 			
 			canvas.width = dom.window.innerWidth;
 			canvas.height = dom.window.innerHeight;
@@ -26,19 +28,50 @@ class _Main {
 			};
 		}
 		
-		// data-theta-img属性を持つcanvasがある場合
-		var all_canvas = dom.window.document.getElementsByTagName('canvas');
-		for (var i = 0; i < all_canvas.length; ++i) {
-			var elem = all_canvas[i] as HTMLElement;
-			var theta_url = elem.dataset['thetaImg'];
-			if (theta_url) {
+		// data属性を持つcanvasがあるかどうか調べる
+		var all_canvases = dom.window.document.getElementsByTagName('canvas');
+		for (var i = 0; i < all_canvases.length; ++i) {
+			var canvas = all_canvases[i] as HTMLCanvasElement;
+			
+			function setOptions(iota:Iota, canvas:HTMLCanvasElement):void {
+				var fisheye = canvas.dataset['iotaFisheye'];
+				if (fisheye) iota.setFishEye(fisheye == 'true');
+				
+				var heading = canvas.dataset['iotaHeading'];
+				if (heading) iota.setHeading(heading as number);
+				
+				var pitching = canvas.dataset['iotaPitching'];
+				if (pitching) iota.setPitching(pitching as number);
+				
+				var fov = canvas.dataset['iotaFov'];
+				if (fov) iota.setFOV(fov as number);
+			}
+			
+			// canvasがdata-theta-img属性を持つ場合
+			var theta_img_url = canvas.dataset['thetaImg'];
+			if (theta_img_url) {
 				(function(canvas:HTMLCanvasElement, url:string):void{
 					var img = dom.window.document.createElement('img') as HTMLImageElement;
 					img.onload = function(ev:Event):void {
-						new Iota(canvas, null, img, canvas.dataset['iotaFisheye'] != null);
+						var iota = new Iota(canvas);
+						setOptions(iota, canvas);
+						iota.setImage(img);
 					};
 					img.src = url;
-				})(elem as HTMLCanvasElement, theta_url);
+				})(canvas, theta_img_url);
+			}
+			
+			// canvasがdata-theta-video属性を持つ場合
+			var theta_video_url = canvas.dataset['thetaVideo'];
+			if (theta_video_url) {
+				(function(canvas:HTMLCanvasElement, url:string):void{
+					var video = dom.window.document.createElement('video') as HTMLVideoElement;
+					video.src = url;
+					video.play();
+					var iota = new Iota(canvas);
+					setOptions(iota, canvas);
+					iota.setVideo(video);
+				})(canvas, theta_video_url);
 			}
 		}
 	}
@@ -51,8 +84,20 @@ native final class FullScreenHandler {
 }
 
 class Iota {
+	var setFishEye = null:function(:boolean):void;
+	var setHeading = null:function(:number):void;
+	var setPitching = null:function(:number):void;
+	var setFOV = null:function(:number):void;
+	var setFileInput = null:function(:HTMLInputElement):void;
+	var setImage = null:function(:HTMLImageElement):void;
+	var setVideo = null:function(:HTMLVideoElement):void;
 	var draw = null:function():void;
-	function constructor(canvas:HTMLCanvasElement, input:HTMLInputElement, init_img:HTMLImageElement = null, fish_eye:boolean = false) {
+	
+	
+	function constructor(canvas:HTMLCanvasElement) {
+		var input = null:HTMLInputElement;
+		var fish_eye = false;
+		
 		// 全球の分割数 横・縦
 		var hdiv = 128;
 		var vdiv = 64;
@@ -175,10 +220,13 @@ class Iota {
 		gl.linkProgram(prog_f);
 		if (!(gl.getProgramParameter(prog_f, gl.LINK_STATUS) as boolean)) console.log(gl.getProgramInfoLog(prog_f));
 		
+		// テクスチャ(この1枚を使い続ける)
+		var texture =  gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, texture);
 		
 		
-		// テクスチャ、画角(near)、方位と仰角、THETAの傾き
-		var texture = null:WebGLTexture;
+		
+		// 画角(near)、方位と仰角、THETAの傾き
 		var near = 0.1;
 		var view_h = 0;
 		var view_p = 0;
@@ -230,10 +278,6 @@ class Iota {
 		
 		// テクスチャを切り替える
 		function setImage(img:HTMLImageElement) : void {
-			if (!texture) {
-				texture = gl.createTexture();
-				gl.bindTexture(gl.TEXTURE_2D, texture);
-			}
 			gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
 			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
 			gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -244,6 +288,24 @@ class Iota {
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 			draw();
 		}
+		this.setImage = setImage;
+		
+		// 動画を再生する
+		function setVideo(video:HTMLVideoElement) : void {
+			function setVideoCurrentFrame() : void {
+				gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+				gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+				gl.bindTexture(gl.TEXTURE_2D, texture);
+				gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+				draw();
+			}
+			Timer.setInterval(setVideoCurrentFrame, 1000.0 / 15);
+		}
+		this.setVideo = setVideo;
 		
 		// 画角を変える
 		function onWheel(w:number) : void {
@@ -255,8 +317,6 @@ class Iota {
 		
 		
 		
-		if (init_img) setImage(init_img);
-		
 		var files = null:FileList;
 		var file_index = -1;
 		
@@ -267,6 +327,18 @@ class Iota {
 			
 			var file = files[n];
 			
+			if (file.type.substring(0, 5) == 'video') {
+				var video_reader = new FileReader;
+				video_reader.onload = function(e:Event):void {
+					// now file reading complete
+					var video = dom.document.createElement('video') as HTMLVideoElement;
+					video.src = (e.target as FileReader).result as __noconvert__ string;
+					video.play();
+					setVideo(video);
+				};
+				video_reader.readAsDataURL(file);
+			}
+			
 			// テクスチャ用のファイル読み取り
 			var file_reader = new FileReader;
 			file_reader.onload = function(e:Event):void {
@@ -274,8 +346,6 @@ class Iota {
 				var img = dom.document.createElement('img') as HTMLImageElement;
 				img.onload = function(e:Event):void {
 					// now image creation complete
-					view_h = 0;
-					view_p = 0;
 					setImage(img);
 				};
 				img.src = (e.target as FileReader).result as __noconvert__ string;
@@ -314,14 +384,6 @@ class Iota {
 				draw();
 			};
 			binary_reader.readAsBinaryString(file);
-		}
-		
-		// ファイル選択
-		if (input) {
-			input.onchange = function(e:Event):void {
-				files = input.files;
-				setFile(file_index = 0);
-			};
 		}
 		
 		// D&D対応
@@ -465,5 +527,37 @@ class Iota {
 					break;
 			}
 		});
+		
+		// 魚眼設定
+		function setFishEye(enable:boolean):void {
+			fish_eye = enable;
+			draw();
+		}
+		this.setFishEye = setFishEye;
+		
+		// ファイル選択ダイアログ設定
+		function setFileInput(ie:HTMLInputElement):void {
+			// ファイル選択
+			if (ie == input) return;
+			if (input) input.onchange = null;
+			if (input = ie) {
+				input.onchange = function(e:Event):void {
+					files = input.files;
+					setFile(file_index = 0);
+				};
+			}
+		}
+		this.setFileInput = setFileInput;
+		
+		// 視線方向設定
+		this.setHeading = function(h:number):void {view_h = h * -Math.PI / 180;};
+		this.setPitching = function(p:number):void {view_p = p * Math.PI / 180;};
+		
+		// 画角設定
+		this.setFOV = function(a:number):void {
+			near = 0.1 / Math.tan(a/2 * Math.PI / 180);
+			if (near > 0.9) near = 0.9;
+			if (near < 0.01) near = 0.01;
+		};
 	}
 }
