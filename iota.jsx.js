@@ -263,6 +263,7 @@ function _Main$main$AS(args) {
 		if (theta_video_url) {
 			video$0 = dom.window.document.createElement('video');
 			video$0.src = theta_video_url;
+			video$0.loop = true;
 			video$0.play();
 			iota$0 = new Iota(canvas);
 			setOptions(iota$0, canvas);
@@ -278,6 +279,8 @@ function Iota(canvas) {
 	var $this = this;
 	var input;
 	var fish_eye;
+	var raw_mode;
+	var playing_video;
 	var hdiv;
 	var vdiv;
 	var create_lattice;
@@ -289,8 +292,11 @@ function Iota(canvas) {
 	var vs;
 	var vs_f;
 	var fs;
+	var fs_r;
+	var progs;
+	var f;
+	var r;
 	var prog;
-	var prog_f;
 	var texture;
 	var near;
 	var view_h;
@@ -299,6 +305,7 @@ function Iota(canvas) {
 	var z_y;
 	var draw;
 	var setImage;
+	var setVideoCurrentFrame;
 	var setVideo;
 	var onWheel;
 	var files;
@@ -323,6 +330,8 @@ function Iota(canvas) {
 	this.draw = null;
 	input = null;
 	fish_eye = false;
+	raw_mode = false;
+	playing_video = null;
 	hdiv = 128;
 	vdiv = 64;
 	function create_lattice(hdiv, vdiv) {
@@ -383,19 +392,24 @@ function Iota(canvas) {
 	if (! (!! gl.getShaderParameter(fs, gl.COMPILE_STATUS))) {
 		console.log(gl.getShaderInfoLog(fs));
 	}
-	prog = gl.createProgram();
-	gl.attachShader(prog, vs);
-	gl.attachShader(prog, fs);
-	gl.linkProgram(prog);
-	if (! (!! gl.getProgramParameter(prog, gl.LINK_STATUS))) {
-		console.log(gl.getProgramInfoLog(prog));
+	fs_r = gl.createShader(gl.FRAGMENT_SHADER);
+	gl.shaderSource(fs_r, "\n\t\t\tprecision mediump float;\n\t\t\tuniform sampler2D texture;\n\t\t\tvarying vec2 v_texcoord;\n\t\t\tvoid main() {\n\t\t\t\tfloat r = 0.403;\n\t\t\t\tfloat yc = 1.0 - 960.0 / 1080.0 / 2.0;\n\t\t\t\tfloat st_ratio = 0.5 * 1080.0 / 960.0;\n\t\t\t\tfloat pi = 3.14159265;\n\t\t\t\t\n\t\t\t\tfloat lon = (v_texcoord.s - 0.25) * 2.0 * pi;\n\t\t\t\tfloat lat = (v_texcoord.t - 0.5) * pi;\n\t\t\t\tfloat loc = cos(lon), los = sin(lon);\n\t\t\t\tfloat lac = cos(lat), las = sin(lat);\n\t\t\t\tvec3 v = vec3(lac * loc, las, lac * los);\n\t\t\t\tvec2 tc;\n\t\t\t\tif (v.z > 0.0) {\n\t\t\t\t\tfloat theta = atan(v.y, -v.x);\n\t\t\t\t\tfloat phi = atan(sqrt(v.x*v.x+v.y*v.y), v.z) / pi * 2.0;\n\t\t\t\t\ttc.s = 0.25 - st_ratio * r * phi * sin(theta);\n\t\t\t\t\ttc.t = yc + r * phi * cos(theta);\n\t\t\t\t} else {\n\t\t\t\t\tfloat theta = atan(v.y, v.x);\n\t\t\t\t\tfloat phi = atan(sqrt(v.x*v.x+v.y*v.y), -v.z) / pi * 2.0;\n\t\t\t\t\ttc.s = 0.75 - st_ratio * r * phi * sin(theta);\n\t\t\t\t\ttc.t = yc + r * phi * cos(theta);\n\t\t\t\t}\n\t\t\t\tgl_FragColor = texture2D(texture, tc);\n\t\t\t}\n\t\t");
+	gl.compileShader(fs_r);
+	if (! (!! gl.getShaderParameter(fs_r, gl.COMPILE_STATUS))) {
+		console.log(gl.getShaderInfoLog(fs_r));
 	}
-	prog_f = gl.createProgram();
-	gl.attachShader(prog_f, vs_f);
-	gl.attachShader(prog_f, fs);
-	gl.linkProgram(prog_f);
-	if (! (!! gl.getProgramParameter(prog_f, gl.LINK_STATUS))) {
-		console.log(gl.getProgramInfoLog(prog_f));
+	progs = [ [ WebGLProgram ], [ WebGLProgram ] ];
+	for (f = 0; f < 2; ++f) {
+		for (r = 0; r < 2; ++r) {
+			prog = gl.createProgram();
+			gl.attachShader(prog, f ? vs_f : vs);
+			gl.attachShader(prog, r ? fs_r : fs);
+			gl.linkProgram(prog);
+			if (! (!! gl.getProgramParameter(prog, gl.LINK_STATUS))) {
+				console.log(gl.getProgramInfoLog(prog));
+			}
+			progs[f][r] = prog;
+		}
 	}
 	texture = gl.createTexture();
 	gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -442,7 +456,7 @@ function Iota(canvas) {
 		hr = (1 >= value2$0 ? 1 : value2$0);
 		value2$1 = h / w;
 		vr = (1 >= value2$1 ? 1 : value2$1);
-		p = (fish_eye ? prog_f : prog);
+		p = progs[fish_eye ? 1 : 0][raw_mode ? 1 : 0];
 		gl.useProgram(p);
 		gl.uniform1i(gl.getUniformLocation(p, 'texture'), 0);
 		gl.uniformMatrix4fv(gl.getUniformLocation(p, 'projectionMatrix'), false, fish_eye ? M44$array$LM44$((l$0 = - hr, b$0 = - vr, f$0 = near + 2, M44$setOrtho$LM44$NNNNNN(new M44(), l$0, hr, b$0, vr, near, f$0))) : M44$array$LM44$((l$1 = -0.1 * hr, r$0 = 0.1 * hr, b$1 = -0.1 * vr, t$0 = 0.1 * vr, f$1 = near + 1, M44$setFrustum$LM44$NNNNNN(new M44(), l$1, r$0, b$1, t$0, near, f$1))));
@@ -454,6 +468,11 @@ function Iota(canvas) {
 	}
 	this.draw = draw;
 	function setImage(img) {
+		if (playing_video) {
+			playing_video.pause();
+			playing_video.currentTime = 0;
+			playing_video = null;
+		}
 		gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
 		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
 		gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -465,20 +484,27 @@ function Iota(canvas) {
 		draw();
 	}
 	this.setImage = setImage;
-	function setVideo(video) {
-		var setVideoCurrentFrame;
-		function setVideoCurrentFrame() {
-			gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-			gl.bindTexture(gl.TEXTURE_2D, texture);
-			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-			draw();
+	function setVideoCurrentFrame() {
+		if (playing_video && ! playing_video.paused) {
+			js$0.global.setTimeout(setVideoCurrentFrame, 66.66666666666667);
 		}
-		js$0.global.setInterval(setVideoCurrentFrame, 66.66666666666667);
+		gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, playing_video);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		draw();
+	}
+	function setVideo(video) {
+		if (playing_video) {
+			playing_video.pause();
+			playing_video.currentTime = 0;
+		}
+		playing_video = video;
+		js$0.global.setTimeout(setVideoCurrentFrame, 66.66666666666667);
 	}
 	this.setVideo = setVideo;
 	function onWheel(w) {
@@ -495,6 +521,9 @@ function Iota(canvas) {
 	file_index = -1;
 	function setFile(n) {
 		var file;
+		var w;
+		var url;
+		var video;
 		var video_reader;
 		var file_reader;
 		var binary_reader;
@@ -506,15 +535,26 @@ function Iota(canvas) {
 		}
 		file = files[n];
 		if (file.type.substring(0, 5) === 'video') {
-			video_reader = new FileReader();
-			video_reader.onload = (function (e) {
-				var video;
+			w = dom.window;
+			if (w.webkitURL) {
+				url = w.webkitURL;
 				video = dom.document.createElement('video');
-				video.src = e.target.result;
+				video.src = url.createObjectURL(file);
+				video.loop = true;
 				video.play();
 				setVideo(video);
-			});
-			video_reader.readAsDataURL(file);
+			} else {
+				video_reader = new FileReader();
+				video_reader.onload = (function (e) {
+					var video;
+					video = dom.document.createElement('video');
+					video.src = e.target.result;
+					video.loop = true;
+					video.play();
+					setVideo(video);
+				});
+				video_reader.readAsDataURL(file);
+			}
 		}
 		file_reader = new FileReader();
 		file_reader.onload = (function (e) {
@@ -715,6 +755,15 @@ function Iota(canvas) {
 		default:
 			console.log('unknown key code: ', kev.keyCode);
 			break;
+		case 80:
+			if (playing_video) {
+				if (playing_video.paused) {
+					playing_video.play();
+					setVideoCurrentFrame();
+				} else {
+					playing_video.pause();
+				}
+			}
 		case 37:
 			if (files && --file_index >= 0) {
 				setFile((file_index | 0));
@@ -731,6 +780,10 @@ function Iota(canvas) {
 			break;
 		case 70:
 			fish_eye = ! fish_eye;
+			draw();
+			break;
+		case 82:
+			raw_mode = ! raw_mode;
 			draw();
 			break;
 		}
