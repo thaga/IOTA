@@ -67,6 +67,7 @@ class _Main {
 				(function(canvas:HTMLCanvasElement, url:string):void{
 					var video = dom.window.document.createElement('video') as HTMLVideoElement;
 					video.src = url;
+					video.loop = true;
 					video.play();
 					var iota = new Iota(canvas);
 					setOptions(iota, canvas);
@@ -105,6 +106,8 @@ class Iota {
 	function constructor(canvas:HTMLCanvasElement) {
 		var input = null:HTMLInputElement;
 		var fish_eye = false;
+		var raw_mode = false;
+		var playing_video = null:HTMLVideoElement;
 		
 		// 全球の分割数 横・縦
 		var hdiv = 128;
@@ -214,19 +217,51 @@ class Iota {
 		gl.compileShader(fs);
 		if (!(gl.getShaderParameter(fs, gl.COMPILE_STATUS) as boolean)) console.log(gl.getShaderInfoLog(fs));
 		
-		// シェーダプログラムを作成
-		var prog = gl.createProgram();
-		gl.attachShader(prog, vs);
-		gl.attachShader(prog, fs);
-		gl.linkProgram(prog);
-		if (!(gl.getProgramParameter(prog, gl.LINK_STATUS) as boolean)) console.log(gl.getProgramInfoLog(prog));
+		// rawモード用フラグメントシェーダを作成
+		var fs_r = gl.createShader(gl.FRAGMENT_SHADER);
+		gl.shaderSource(fs_r, """
+			precision mediump float;
+			uniform sampler2D texture;
+			varying vec2 v_texcoord;
+			void main() {
+				float r = 0.403;
+				float yc = 1.0 - 960.0 / 1080.0 / 2.0;
+				float st_ratio = 0.5 * 1080.0 / 960.0;
+				float pi = 3.14159265;
+				
+				float lon = (v_texcoord.s - 0.25) * 2.0 * pi;
+				float lat = (v_texcoord.t - 0.5) * pi;
+				float loc = cos(lon), los = sin(lon);
+				float lac = cos(lat), las = sin(lat);
+				vec3 v = vec3(lac * loc, las, lac * los);
+				vec2 tc;
+				if (v.z > 0.0) {
+					float theta = atan(v.y, -v.x);
+					float phi = atan(sqrt(v.x*v.x+v.y*v.y), v.z) / pi * 2.0;
+					tc.s = 0.25 - st_ratio * r * phi * sin(theta);
+					tc.t = yc + r * phi * cos(theta);
+				} else {
+					float theta = atan(v.y, v.x);
+					float phi = atan(sqrt(v.x*v.x+v.y*v.y), -v.z) / pi * 2.0;
+					tc.s = 0.75 - st_ratio * r * phi * sin(theta);
+					tc.t = yc + r * phi * cos(theta);
+				}
+				gl_FragColor = texture2D(texture, tc);
+			}
+		""");
+		gl.compileShader(fs_r);
+		if (!(gl.getShaderParameter(fs_r, gl.COMPILE_STATUS) as boolean)) console.log(gl.getShaderInfoLog(fs_r));
 		
-		// 魚眼シェーダプログラムを作成
-		var prog_f = gl.createProgram();
-		gl.attachShader(prog_f, vs_f);
-		gl.attachShader(prog_f, fs);
-		gl.linkProgram(prog_f);
-		if (!(gl.getProgramParameter(prog_f, gl.LINK_STATUS) as boolean)) console.log(gl.getProgramInfoLog(prog_f));
+		// シェーダプログラムを作成[魚眼][rawモード]
+		var progs = [[WebGLProgram], [WebGLProgram]];
+		for (var f = 0; f < 2; ++f) for (var r = 0; r < 2; ++r) {
+			var prog = gl.createProgram();
+			gl.attachShader(prog, f ? vs_f : vs);
+			gl.attachShader(prog, r ? fs_r : fs);
+			gl.linkProgram(prog);
+			if (!(gl.getProgramParameter(prog, gl.LINK_STATUS) as boolean)) console.log(gl.getProgramInfoLog(prog));
+			progs[f][r] = prog;
+		}
 		
 		// テクスチャ(この1枚を使い続ける)
 		var texture =  gl.createTexture();
@@ -250,7 +285,8 @@ class Iota {
 			var hr = Math.max(1, w / h);
 			var vr = Math.max(1, h / w);
 			
-			var p = fish_eye ? prog_f : prog;
+			//var p = fish_eye ? prog_f : prog;
+			var p = progs[fish_eye?1:0][raw_mode?1:0];
 			
 			gl.useProgram(p);
 			
@@ -286,6 +322,11 @@ class Iota {
 		
 		// テクスチャを切り替える
 		function setImage(img:HTMLImageElement) : void {
+			if (playing_video) {
+				playing_video.pause();
+				playing_video.currentTime = 0;
+				playing_video = null;
+			}
 			gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
 			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
 			gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -299,12 +340,9 @@ class Iota {
 		this.setImage = setImage;
 		
 		// 動画を再生する
-		var playing_video = null:HTMLVideoElement;
 		function setVideoCurrentFrame() : void {
-			if (!playing_video.duration || playing_video.currentTime < playing_video.duration) {
+			if (playing_video && !playing_video.paused) {
 				Timer.setTimeout(setVideoCurrentFrame, 1000.0 / 15);
-			} else {
-				playing_video = null;
 			}
 			gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
 			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
@@ -354,6 +392,7 @@ class Iota {
 					var url = w['webkitURL'] as URL_;
 					var video = dom.document.createElement('video') as HTMLVideoElement;
 					video.src = url.createObjectURL(file);
+					video.loop = true;
 					video.play();
 					setVideo(video);
 				} else {
@@ -362,6 +401,7 @@ class Iota {
 						// now file reading complete
 						var video = dom.document.createElement('video') as HTMLVideoElement;
 						video.src = (e.target as FileReader).result as __noconvert__ string;
+						video.loop = true;
 						video.play();
 						setVideo(video);
 					};
@@ -545,6 +585,15 @@ class Iota {
 				default:
 					console.log('unknown key code: ', kev.keyCode);
 					break;
+				case 80: // P
+					if (playing_video) {
+						if (playing_video.paused) {
+							playing_video.play();
+							setVideoCurrentFrame();
+						} else {
+							playing_video.pause();
+						}
+					}
 				case 37: // ←
 					if (files && --file_index >= 0) setFile(file_index); else file_index = 0;
 					break;
@@ -553,6 +602,10 @@ class Iota {
 					break;
 				case 70: // F
 					fish_eye = !fish_eye;
+					draw();
+					break;
+				case 82: // R
+					raw_mode = !raw_mode;
 					draw();
 					break;
 			}
